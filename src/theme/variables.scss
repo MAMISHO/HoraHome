@@ -1,2 +1,78 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+/** Ionic CSS Variables & Design System **/
+
+:root {
+  /** Primary - Deep Indigo **/
+  --ion-color-primary: #4f46e5;
+  --ion-color-primary-rgb: 79, 70, 229;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #4338ca;
+  --ion-color-primary-tint: #6366f1;
+
+  /** Secondary - Sky Blue **/
+  --ion-color-secondary: #0284c7;
+  --ion-color-secondary-rgb: 2, 132, 199;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #0369a1;
+  --ion-color-secondary-tint: #38bdf8;
+
+  /** Success - Emerald **/
+  --ion-color-success: #059669;
+  --ion-color-success-rgb: 5, 150, 105;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #047857;
+  --ion-color-success-tint: #10b981;
+
+  /** Warning - Amber **/
+  --ion-color-warning: #d97706;
+  --ion-color-warning-rgb: 217, 119, 6;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #b45309;
+  --ion-color-warning-tint: #f59e0b;
+
+  /** Danger - Rose **/
+  --ion-color-danger: #dc2626;
+  --ion-color-danger-rgb: 220, 38, 38;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #b91c1c;
+  --ion-color-danger-tint: #ef4444;
+
+  /** Neutral Surface Tokens **/
+  --ion-background-color: #f8fafc;
+  --ion-background-color-rgb: 248, 250, 252;
+
+  --ion-text-color: #0f172a;
+  --ion-text-color-rgb: 15, 23, 42;
+
+  --ion-card-background: #ffffff;
+  --ion-item-background: #ffffff;
+
+  --app-calendar-bg: #e2e8f0;
+  --app-calendar-day-bg: #ffffff;
+  --app-calendar-day-text: #1e293b;
+  --app-calendar-day-subtext: #64748b;
+  --app-calendar-day-border: #cbd5e1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #0f172a;
+    --ion-background-color-rgb: 15, 23, 42;
+
+    --ion-text-color: #f8fafc;
+    --ion-text-color-rgb: 248, 250, 252;
+
+    --ion-card-background: #1e293b;
+    --ion-item-background: #1e293b;
+
+    --app-calendar-bg: #1e293b;
+    --app-calendar-day-bg: #334155;
+    --app-calendar-day-text: #f8fafc;
+    --app-calendar-day-subtext: #94a3b8;
+    --app-calendar-day-border: #475569;
+  }
+}

@@ -1,11 +1,22 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>{{ (isEdit ? 'WORK_LOGS.EDIT' : 'DASHBOARD.REGISTER_TODAY') | translate }}</ion-title>
+    <ion-title>{{ workDate | date:'fullDate':undefined:currentLang }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()">
         <ion-icon name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar *ngIf="dateLogs.length > 0">
+    <ion-segment [(ngModel)]="activeTab">
+      <ion-segment-button value="list">
+        <ion-label>Registros ({{ dateLogs.length }})</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="form">
+        <ion-label>{{ isEdit ? ('WORK_LOGS.EDIT' | translate) : ('DASHBOARD.REGISTER_TODAY' | translate) }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
@@ -15,50 +26,80 @@
     <span>{{ 'CALENDAR.HOLIDAY' | translate }}: {{ holidayName }}</span>
   </div>
 
-  <form (ngSubmit)="save()">
-    <ion-item fill="outline" class="ion-margin-bottom">
-      <ion-label position="stacked">{{ 'CALENDAR.SELECT_DATE' | translate }}</ion-label>
-      <ion-input type="date" [(ngModel)]="workDate" name="workDate" required></ion-input>
-    </ion-item>
+  <!-- Vista 1: Listado de registros del día -->
+  <div *ngIf="activeTab === 'list'">
+    <ion-list>
+      <ion-item-sliding *ngFor="let log of dateLogs">
+        <ion-item>
+          <ion-label>
+            <h2>{{ log.client.name }}</h2>
+            <p>{{ ('SERVICES.' + log.service.name) | translate }} • <strong>{{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</strong></p>
+            <p *ngIf="log.notes" class="log-notes"><em>{{ log.notes }}</em></p>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button color="primary" (click)="startEditLog(log)" title="Editar">
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button color="danger" (click)="confirmDeleteLog(log)" title="Eliminar">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-item>
+      </ion-item-sliding>
+    </ion-list>
 
-    <ion-item fill="outline" class="ion-margin-bottom">
-      <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
-      <ion-select [(ngModel)]="selectedClientId" name="selectedClientId" required (ionChange)="onClientChange()">
-        <ion-select-option *ngFor="let client of activeClients" [value]="client.id">
-          {{ client.name }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <ion-item fill="outline" class="ion-margin-bottom">
-      <ion-label position="stacked">{{ 'DASHBOARD.SERVICES_BREAKDOWN' | translate }}</ion-label>
-      <ion-select [(ngModel)]="selectedServiceId" name="selectedServiceId" required>
-        <ion-select-option *ngFor="let service of services" [value]="service.id">
-          {{ ('SERVICES.' + service.name) | translate }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <div class="hours-picker ion-margin-bottom">
-      <ion-label class="hours-label">{{ 'REPORTS.TOTAL_HOURS' | translate }}: {{ hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</ion-label>
-      <div class="hours-controls">
-        <ion-button fill="outline" color="medium" (click)="adjustHours(-0.5)" [disabled]="hours <= 0.5">
-          <ion-icon name="remove-outline"></ion-icon>
-        </ion-button>
-        <span class="hours-value">{{ hours }}</span>
-        <ion-button fill="outline" color="primary" (click)="adjustHours(0.5)" [disabled]="hours >= 24">
-          <ion-icon name="add-outline"></ion-icon>
-        </ion-button>
-      </div>
-    </div>
-
-    <ion-item fill="outline" class="ion-margin-bottom">
-      <ion-label position="stacked">{{ 'WORK_LOGS.SEARCH_PLACEHOLDER' | translate }}</ion-label>
-      <ion-textarea [(ngModel)]="notes" name="notes" rows="3"></ion-textarea>
-    </ion-item>
-
-    <ion-button type="submit" expand="block" [disabled]="!selectedClientId || !selectedServiceId">
-      {{ 'WORK_LOGS.SAVE' | translate }}
+    <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="startNewRegistration()">
+      + {{ 'DASHBOARD.REGISTER_TODAY' | translate }}
     </ion-button>
-  </form>
+  </div>
+
+  <!-- Vista 2: Formulario de registro/edición -->
+  <div *ngIf="activeTab === 'form'">
+    <form (ngSubmit)="save()">
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'CALENDAR.SELECT_DATE' | translate }}</ion-label>
+        <ion-input type="date" [(ngModel)]="workDate" name="workDate" required (ionChange)="loadDateLogs(); checkHoliday();"></ion-input>
+      </ion-item>
+
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
+        <ion-select [(ngModel)]="selectedClientId" name="selectedClientId" required (ionChange)="onClientChange()">
+          <ion-select-option *ngFor="let client of activeClients" [value]="client.id">
+            {{ client.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'DASHBOARD.SERVICES_BREAKDOWN' | translate }}</ion-label>
+        <ion-select [(ngModel)]="selectedServiceId" name="selectedServiceId" required>
+          <ion-select-option *ngFor="let service of services" [value]="service.id">
+            {{ ('SERVICES.' + service.name) | translate }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div class="hours-picker ion-margin-bottom">
+        <ion-label class="hours-label">{{ 'REPORTS.TOTAL_HOURS' | translate }}: {{ hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</ion-label>
+        <div class="hours-controls">
+          <ion-button fill="outline" color="medium" (click)="adjustHours(-0.5)" [disabled]="hours <= 0.5">
+            <ion-icon name="remove-outline"></ion-icon>
+          </ion-button>
+          <span class="hours-value">{{ hours }}</span>
+          <ion-button fill="outline" color="primary" (click)="adjustHours(0.5)" [disabled]="hours >= 24">
+            <ion-icon name="add-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'WORK_LOGS.SEARCH_PLACEHOLDER' | translate }}</ion-label>
+        <ion-textarea [(ngModel)]="notes" name="notes" rows="3"></ion-textarea>
+      </ion-item>
+
+      <ion-button type="submit" expand="block" [disabled]="!selectedClientId || !selectedServiceId">
+        {{ 'WORK_LOGS.SAVE' | translate }}
+      </ion-button>
+    </form>
+  </div>
 </ion-content>

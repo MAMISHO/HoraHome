@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { DatabaseService } from '../../../core/services/database.service';
 import { Client } from '../../../core/entities/client.entity';
 import { Service } from '../../../core/entities/service.entity';
@@ -17,7 +18,11 @@ export class WorkLogModalComponent implements OnInit {
   @Input() initialClientId?: string;
   @Input() workLog?: WorkLog;
 
+  activeTab: 'list' | 'form' = 'form';
   isEdit = false;
+  editingLogId: string | null = null;
+  hasSavedChanges = false;
+
   workDate = new Date().toISOString().split('T')[0];
   selectedClientId = '';
   selectedServiceId = '';
@@ -27,37 +32,40 @@ export class WorkLogModalComponent implements OnInit {
   isHoliday = false;
   holidayName = '';
 
+  dateLogs: WorkLog[] = [];
   activeClients: Client[] = [];
   services: Service[] = [];
 
   constructor(
     private modalCtrl: ModalController,
+    private alertCtrl: AlertController,
     private dbService: DatabaseService,
-    private langService: LanguageService
+    public langService: LanguageService,
+    private translate: TranslateService
   ) {}
+
+  get currentLang(): string {
+    return this.langService.getCurrentLanguage();
+  }
 
   async ngOnInit(): Promise<void> {
     await this.loadClientsAndServices();
 
+    if (this.initialDate) {
+      this.workDate = this.initialDate;
+    }
+
+    await this.loadDateLogs();
+
     if (this.workLog) {
-      this.isEdit = true;
-      this.workDate = this.workLog.workDate;
-      this.selectedClientId = this.workLog.client.id;
-      this.selectedServiceId = this.workLog.service.id;
-      this.hours = Number(this.workLog.hours);
-      this.notes = this.workLog.notes || '';
+      this.setupEditForm(this.workLog);
+      this.activeTab = 'form';
+    } else if (this.dateLogs.length > 0) {
+      this.activeTab = 'list';
+      this.resetForm();
     } else {
-      if (this.initialDate) {
-        this.workDate = this.initialDate;
-      }
-      if (this.initialClientId) {
-        this.selectedClientId = this.initialClientId;
-      } else if (this.activeClients.length > 0) {
-        this.selectedClientId = this.activeClients[0].id;
-      }
-      if (this.services.length > 0) {
-        this.selectedServiceId = this.services[0].id;
-      }
+      this.activeTab = 'form';
+      this.resetForm();
     }
 
     await this.checkHoliday();
@@ -67,6 +75,90 @@ export class WorkLogModalComponent implements OnInit {
     if (this.dbService.isReady()) {
       this.activeClients = await this.dbService.clientRepo.findBy({ isActive: true });
       this.services = await this.dbService.serviceRepo.find();
+    }
+  }
+
+  async loadDateLogs(): Promise<void> {
+    if (!this.dbService.isReady() || !this.workDate) return;
+    this.dateLogs = await this.dbService.workLogRepo
+      .createQueryBuilder('log')
+      .leftJoinAndSelect('log.client', 'client')
+      .leftJoinAndSelect('log.service', 'service')
+      .where('log.workDate = :date', { date: this.workDate })
+      .orderBy('log.createdAt', 'DESC')
+      .getMany();
+  }
+
+  setupEditForm(log: WorkLog): void {
+    this.isEdit = true;
+    this.editingLogId = log.id;
+    this.workDate = log.workDate;
+    this.selectedClientId = log.client.id;
+    this.selectedServiceId = log.service.id;
+    this.hours = Number(log.hours);
+    this.notes = log.notes || '';
+  }
+
+  resetForm(): void {
+    this.isEdit = false;
+    this.editingLogId = null;
+    if (this.initialClientId) {
+      this.selectedClientId = this.initialClientId;
+    } else if (this.activeClients.length > 0) {
+      this.selectedClientId = this.activeClients[0].id;
+    }
+    if (this.services.length > 0) {
+      this.selectedServiceId = this.services[0].id;
+    }
+    this.hours = 4.0;
+    this.notes = '';
+  }
+
+  startNewRegistration(): void {
+    this.resetForm();
+    this.activeTab = 'form';
+  }
+
+  startEditLog(log: WorkLog): void {
+    this.setupEditForm(log);
+    this.activeTab = 'form';
+  }
+
+  async confirmDeleteLog(log: WorkLog): Promise<void> {
+    const msg = this.translate.instant('WORK_LOGS.DELETE_CONFIRM', {
+      hours: log.hours,
+      client: log.client.name,
+    });
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('WORK_LOGS.DELETE'),
+      message: msg,
+      buttons: [
+        {
+          text: this.translate.instant('WORK_LOGS.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translate.instant('WORK_LOGS.DELETE'),
+          role: 'destructive',
+          handler: async () => {
+            await this.executeDeleteLog(log);
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async executeDeleteLog(log: WorkLog): Promise<void> {
+    if (this.dbService.isReady()) {
+      await this.dbService.workLogRepo.remove(log);
+      this.hasSavedChanges = true;
+      await this.loadDateLogs();
+      if (this.dateLogs.length === 0) {
+        this.startNewRegistration();
+      }
     }
   }
 
@@ -84,7 +176,6 @@ export class WorkLogModalComponent implements OnInit {
   }
 
   onClientChange(): void {
-    // Default service choice on client selection if not edit
     if (!this.isEdit && this.services.length > 0) {
       this.selectedServiceId = this.services[0].id;
     }
@@ -105,8 +196,9 @@ export class WorkLogModalComponent implements OnInit {
     if (!client || !service) return;
 
     let log: WorkLog;
-    if (this.isEdit && this.workLog) {
-      log = this.workLog;
+    if (this.isEdit && this.editingLogId) {
+      const existing = await this.dbService.workLogRepo.findOneBy({ id: this.editingLogId });
+      log = existing || this.dbService.workLogRepo.create();
     } else {
       log = this.dbService.workLogRepo.create();
     }
@@ -117,11 +209,14 @@ export class WorkLogModalComponent implements OnInit {
     log.hours = this.hours;
     log.notes = this.notes.trim() || undefined;
 
-    const saved = await this.dbService.workLogRepo.save(log);
-    this.modalCtrl.dismiss({ saved: true, workLog: saved });
+    await this.dbService.workLogRepo.save(log);
+    this.hasSavedChanges = true;
+
+    await this.loadDateLogs();
+    this.activeTab = 'list';
   }
 
   dismiss(): void {
-    this.modalCtrl.dismiss();
+    this.modalCtrl.dismiss({ saved: this.hasSavedChanges });
   }
 }

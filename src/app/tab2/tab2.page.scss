@@ -1,26 +1,21 @@
-.calendar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-
-  .month-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    text-transform: capitalize;
-    margin: 0;
-  }
+.month-toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--ion-color-primary-contrast, #ffffff);
 }
 
 .legend-bar {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: var(--ion-color-light, #f4f5f8);
-  padding: 6px 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
+  background: var(--app-calendar-bg, #f1f5f9);
+  color: var(--ion-text-color, #0f172a);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
   font-size: 0.75rem;
+  font-weight: 500;
 
   .legend-item {
     display: flex;
@@ -33,10 +28,10 @@
       border-radius: 50%;
 
       &.working-holiday-dot {
-        background: var(--ion-color-danger, #ef4444);
+        background: var(--ion-color-danger, #dc2626);
       }
       &.worked-dot {
-        background: var(--ion-color-success, #22c55e);
+        background: var(--ion-color-success, #059669);
       }
     }
   }
@@ -45,64 +40,81 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  background: var(--ion-color-light, #f4f5f8);
+  gap: 6px;
+  background: var(--app-calendar-bg, #e2e8f0);
   padding: 8px;
-  border-radius: 12px;
+  border-radius: 14px;
   margin-bottom: 16px;
 
   .weekday-header {
     text-align: center;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--ion-color-medium);
+    color: var(--app-calendar-day-subtext, #64748b);
     padding: 6px 0;
     text-transform: uppercase;
   }
 
   .calendar-day {
-    min-height: 54px;
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 4px;
+    min-height: 56px;
+    background: var(--app-calendar-day-bg, #ffffff);
+    border: 1px solid var(--app-calendar-day-border, #cbd5e1);
+    border-radius: 10px;
+    padding: 6px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     cursor: pointer;
     position: relative;
-    border: 1px solid transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:active {
+      transform: scale(0.96);
+    }
 
     &.other-month {
       opacity: 0.35;
     }
 
     &.is-today {
-      border-color: var(--ion-color-primary);
-      background: rgba(var(--ion-color-primary-rgb), 0.05);
+      border: 2px solid var(--ion-color-primary, #4f46e5);
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+      .day-number {
+        color: var(--ion-color-primary, #4f46e5);
+        font-weight: 800;
+      }
     }
 
-    /* Festivo laboral en día de semana (rojo/destacado - no se trabaja) */
+    &.is-selected {
+      border: 2px solid var(--ion-color-secondary, #06b6d4);
+      background-color: rgba(6, 182, 212, 0.12);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+    }
+
+    /* Festivo laboral en día de semana (rojo destacado - no se trabaja) */
     &.is-working-holiday {
-      background: var(--ion-color-danger-tint, #fef2f2);
-      border-color: var(--ion-color-danger-shade, #b91c1c);
+      background: #fef2f2;
+      border-color: #f87171;
       .day-number {
-        color: var(--ion-color-danger-shade, #b91c1c);
+        color: #991b1b;
         font-weight: 800;
       }
     }
 
     /* Festivo estándar (amarillo/dorado) */
     &.is-holiday:not(.is-working-holiday) {
-      background: var(--ion-color-warning-tint, #fff8e1);
+      background: #fffbe1;
+      border-color: #fcd34d;
       .day-number {
-        color: var(--ion-color-warning-shade, #b78103);
+        color: #92400e;
         font-weight: 700;
       }
     }
 
     .day-number {
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
+      color: var(--app-calendar-day-text, #1e293b);
     }
 
     .day-indicators {
@@ -132,14 +144,17 @@
 
 .selected-day-card {
   margin: 0;
-  border-radius: 12px;
+  border-radius: 14px;
+  background: var(--ion-card-background, #ffffff);
+  color: var(--ion-text-color, #0f172a);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
   .empty-day {
     text-align: center;
     padding: 12px 0;
 
     p {
-      color: var(--ion-color-medium);
+      color: var(--app-calendar-day-subtext, #64748b);
       margin-bottom: 8px;
     }
   }

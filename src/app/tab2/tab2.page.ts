@@ -11,10 +11,17 @@ export interface CalendarDay {
   isCurrentMonth: boolean;
   isToday: boolean;
   isHoliday: boolean;
-  isWorkingDayHoliday: boolean; // Weekday official holiday (no work scheduled)
+  isWorkingDayHoliday: boolean;
   holidayName?: string;
   totalHours: number;
   logs: WorkLog[];
+}
+
+function formatDateIso(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 @Component({
@@ -28,12 +35,21 @@ export class Tab2Page implements OnInit, ViewWillEnter {
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   calendarDays: CalendarDay[] = [];
   selectedDay: CalendarDay | null = null;
+  minDate = '2025-01-01';
 
   constructor(
     private dbService: DatabaseService,
     private langService: LanguageService,
     private modalCtrl: ModalController
-  ) {}
+  ) {
+    if (this.currentMonthDate.getFullYear() < 2025) {
+      this.currentMonthDate = new Date(2025, 0, 1);
+    }
+  }
+
+  get currentLang(): string {
+    return this.langService.getCurrentLanguage();
+  }
 
   async ngOnInit(): Promise<void> {
     await this.generateCalendar();
@@ -44,20 +60,54 @@ export class Tab2Page implements OnInit, ViewWillEnter {
   }
 
   changeMonth(delta: number): void {
-    this.currentMonthDate = new Date(
+    const nextDate = new Date(
       this.currentMonthDate.getFullYear(),
       this.currentMonthDate.getMonth() + delta,
       1
     );
+    if (nextDate.getFullYear() < 2025) return;
+    this.currentMonthDate = nextDate;
     this.generateCalendar();
+  }
+
+  changeYear(delta: number): void {
+    const nextDate = new Date(
+      this.currentMonthDate.getFullYear() + delta,
+      this.currentMonthDate.getMonth(),
+      1
+    );
+    if (nextDate.getFullYear() < 2025) return;
+    this.currentMonthDate = nextDate;
+    this.generateCalendar();
+  }
+
+  goToToday(): void {
+    const today = new Date();
+    this.currentMonthDate = today.getFullYear() < 2025 ? new Date(2025, 0, 1) : today;
+    this.generateCalendar();
+  }
+
+  onMonthYearSelected(event: CustomEvent): void {
+    const val = event.detail.value;
+    if (val) {
+      const parts = val.split('T')[0].split('-');
+      if (parts.length >= 2) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        if (year >= 2025) {
+          this.currentMonthDate = new Date(year, month, 1);
+          this.generateCalendar();
+        }
+      }
+    }
   }
 
   async generateCalendar(): Promise<void> {
     if (!this.dbService.isReady()) return;
 
     const year = this.currentMonthDate.getFullYear();
-    const month = this.currentMonthDate.getMonth(); // 0-11
-    const todayIso = new Date().toISOString().split('T')[0];
+    const month = this.currentMonthDate.getMonth();
+    const todayIso = formatDateIso(new Date());
 
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
@@ -68,8 +118,8 @@ export class Tab2Page implements OnInit, ViewWillEnter {
     const startDate = new Date(year, month, 1 - startDayOfWeek);
     const endDate = new Date(year, month + 1, 6 - lastDayOfMonth.getDay());
 
-    const startDateIso = startDate.toISOString().split('T')[0];
-    const endDateIso = endDate.toISOString().split('T')[0];
+    const startDateIso = formatDateIso(startDate);
+    const endDateIso = formatDateIso(endDate);
 
     const logs = await this.dbService.workLogRepo
       .createQueryBuilder('log')
@@ -109,7 +159,7 @@ export class Tab2Page implements OnInit, ViewWillEnter {
     const curr = new Date(startDate);
 
     while (curr <= endDate) {
-      const dateIso = curr.toISOString().split('T')[0];
+      const dateIso = formatDateIso(curr);
       const dayLogs = logsMap.get(dateIso) || [];
       const totalHours = Math.round(dayLogs.reduce((sum, l) => sum + Number(l.hours), 0) * 10) / 10;
       

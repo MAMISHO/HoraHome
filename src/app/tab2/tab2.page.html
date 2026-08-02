@@ -1,21 +1,38 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>{{ 'CALENDAR.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="start">
+      <ion-button (click)="changeMonth(-1)" title="Mes anterior">
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="ion-text-center month-toolbar-title" id="open-date-picker" style="cursor: pointer;">
+      {{ currentMonthDate | date:'MMMM yyyy':undefined:currentLang }} ▾
+    </ion-title>
+
+    <ion-popover trigger="open-date-picker" showBackdrop="true" dismissOnSelect="true">
+      <ng-template>
+        <ion-datetime
+          presentation="month-year"
+          [value]="currentMonthDate.toISOString()"
+          min="2025-01-01"
+          (ionChange)="onMonthYearSelected($event)"
+        ></ion-datetime>
+      </ng-template>
+    </ion-popover>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="changeMonth(1)" title="Mes siguiente">
+        <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="goToToday()" title="Hoy">
+        <ion-icon slot="icon-only" name="today-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <!-- Cabecera de Navegación del Mes -->
-  <div class="calendar-header">
-    <ion-button fill="clear" (click)="changeMonth(-1)">
-      <ion-icon name="chevron-back-outline"></ion-icon>
-    </ion-button>
-    <h2 class="month-title">{{ currentMonthDate | date:'MMMM yyyy' }}</h2>
-    <ion-button fill="clear" (click)="changeMonth(1)">
-      <ion-icon name="chevron-forward-outline"></ion-icon>
-    </ion-button>
-  </div>
-
   <!-- Leyenda de colores del Calendario -->
   <div class="legend-bar">
     <div class="legend-item">
@@ -39,6 +56,7 @@
       class="calendar-day"
       [class.other-month]="!day.isCurrentMonth"
       [class.is-today]="day.isToday"
+      [class.is-selected]="selectedDay?.dateIso === day.dateIso"
       [class.is-working-holiday]="day.isWorkingDayHoliday"
       [class.is-holiday]="day.isHoliday && !day.isWorkingDayHoliday"
       [class.is-worked]="day.totalHours > 0"
@@ -68,7 +86,7 @@
   <!-- Banner Informativo del Día Seleccionado -->
   <ion-card class="selected-day-card" *ngIf="selectedDay">
     <ion-card-header>
-      <ion-card-subtitle>{{ selectedDay.dateIso | date:'fullDate' }}</ion-card-subtitle>
+      <ion-card-subtitle>{{ selectedDay.dateIso | date:'fullDate':undefined:currentLang }}</ion-card-subtitle>
       <ion-card-title *ngIf="selectedDay.isHoliday">
         <span *ngIf="selectedDay.isWorkingDayHoliday">🚫 {{ selectedDay.holidayName }} (Festivo laboral - No se trabaja)</span>
         <span *ngIf="!selectedDay.isWorkingDayHoliday">🎉 {{ selectedDay.holidayName }}</span>
