@@ -1,17 +1,95 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>{{ 'CALENDAR.TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Cabecera de Navegación del Mes -->
+  <div class="calendar-header">
+    <ion-button fill="clear" (click)="changeMonth(-1)">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </ion-button>
+    <h2 class="month-title">{{ currentMonthDate | date:'MMMM yyyy' }}</h2>
+    <ion-button fill="clear" (click)="changeMonth(1)">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <!-- Leyenda de colores del Calendario -->
+  <div class="legend-bar">
+    <div class="legend-item">
+      <span class="legend-dot working-holiday-dot"></span>
+      <span>Festivo Laboral (No trabajable)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot worked-dot"></span>
+      <span>Horas registradas</span>
+    </div>
+  </div>
+
+  <!-- Rejilla del Calendario -->
+  <div class="calendar-grid">
+    <div class="weekday-header" *ngFor="let dayName of weekDays">
+      {{ dayName }}
+    </div>
+
+    <div
+      *ngFor="let day of calendarDays"
+      class="calendar-day"
+      [class.other-month]="!day.isCurrentMonth"
+      [class.is-today]="day.isToday"
+      [class.is-working-holiday]="day.isWorkingDayHoliday"
+      [class.is-holiday]="day.isHoliday && !day.isWorkingDayHoliday"
+      [class.is-worked]="day.totalHours > 0"
+      (click)="onDayClick(day)"
+    >
+      <span class="day-number">{{ day.dayNumber }}</span>
+
+      <!-- Indicadores del día -->
+      <div class="day-indicators">
+        <!-- Distintivo especial para Festivo Laboral en Día de Semana (No se trabaja) -->
+        <ion-badge color="danger" class="working-holiday-tag" *ngIf="day.isWorkingDayHoliday">
+          <ion-icon name="ban-outline"></ion-icon>
+        </ion-badge>
+
+        <!-- Festivo estándar -->
+        <ion-badge color="warning" class="holiday-tag" *ngIf="day.isHoliday && !day.isWorkingDayHoliday">
+          <ion-icon name="star"></ion-icon>
+        </ion-badge>
+
+        <ion-badge color="success" class="hours-badge" *ngIf="day.totalHours > 0">
+          {{ day.totalHours }}h
+        </ion-badge>
+      </div>
+    </div>
+  </div>
+
+  <!-- Banner Informativo del Día Seleccionado -->
+  <ion-card class="selected-day-card" *ngIf="selectedDay">
+    <ion-card-header>
+      <ion-card-subtitle>{{ selectedDay.dateIso | date:'fullDate' }}</ion-card-subtitle>
+      <ion-card-title *ngIf="selectedDay.isHoliday">
+        <span *ngIf="selectedDay.isWorkingDayHoliday">🚫 {{ selectedDay.holidayName }} (Festivo laboral - No se trabaja)</span>
+        <span *ngIf="!selectedDay.isWorkingDayHoliday">🎉 {{ selectedDay.holidayName }}</span>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngIf="selectedDay.logs.length === 0" class="empty-day">
+        <p>{{ 'WORK_LOGS.NO_LOGS' | translate }}</p>
+        <ion-button size="small" (click)="openLogModalForDate(selectedDay.dateIso)">
+          + {{ 'DASHBOARD.REGISTER_TODAY' | translate }}
+        </ion-button>
+      </div>
+
+      <ion-list *ngIf="selectedDay.logs.length > 0">
+        <ion-item *ngFor="let log of selectedDay.logs">
+          <ion-label>
+            <h2>{{ log.client.name }}</h2>
+            <p>{{ ('SERVICES.' + log.service.name) | translate }} • {{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

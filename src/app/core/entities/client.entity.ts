@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { WorkLog } from './work-log.entity';
+import type { WorkLog } from './work-log.entity';
 
 @Entity('clients')
 export class Client {
@@ -24,6 +24,6 @@ export class Client {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @OneToMany(() => WorkLog, (workLog) => workLog.client)
+  @OneToMany('WorkLog', (workLog: WorkLog) => workLog.client)
   workLogs!: WorkLog[];
 }

@@ -13,4 +13,7 @@ export class BrusselsHoliday {
 
   @Column({ type: 'integer', nullable: false })
   year!: number;
+
+  @Column({ type: 'boolean', default: true })
+  isWorkingDay!: boolean; // Only working days (Mon-Fri / replacement working days)
 }

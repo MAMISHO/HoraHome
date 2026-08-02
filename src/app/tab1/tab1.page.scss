@@ -1,0 +1,89 @@
+.kpi-card {
+  background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+  color: #ffffff;
+  border-radius: 14px;
+  margin: 0 0 16px 0;
+
+  ion-card-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+  }
+
+  .kpi-value {
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-top: 4px;
+
+    small {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  }
+
+  .comparison {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding-top: 4px;
+
+    &.positive {
+      color: #a3e635;
+    }
+    &.negative {
+      color: #f87171;
+    }
+  }
+}
+
+.row-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .mini-card {
+    margin: 0;
+    border-radius: 12px;
+
+    ion-card-subtitle {
+      font-size: 0.75rem;
+    }
+
+    .top-client-title,
+    .holiday-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .holiday-name {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium);
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .holiday-card {
+    border-left: 4px solid var(--ion-color-warning);
+  }
+}
+
+.chart-card {
+  margin: 0 0 80px 0;
+  border-radius: 14px;
+
+  .chart-container {
+    height: 220px;
+    position: relative;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 32px 0;
+  }
+}

@@ -2,8 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
-import { Tab2Page } from './tab2.page';
-import { Tab2PageRoutingModule } from './tab2-routing.module';
+import { ClientsPage } from './clients.page';
+import { ClientsPageRoutingModule } from './clients-routing.module';
+import { ClientModalComponent } from './client-modal/client-modal.component';
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
@@ -11,9 +12,9 @@ import { SharedModule } from '../shared/shared.module';
     CommonModule,
     FormsModule,
     IonicModule,
-    Tab2PageRoutingModule,
+    ClientsPageRoutingModule,
     SharedModule,
   ],
-  declarations: [Tab2Page],
+  declarations: [ClientsPage, ClientModalComponent],
 })
-export class Tab2PageModule {}
+export class ClientsPageModule {}

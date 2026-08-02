@@ -1,0 +1,19 @@
+.hours-badge {
+  float: right;
+  background: var(--ion-color-secondary-tint, #e0f2fe);
+  color: var(--ion-color-secondary-shade, #0369a1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.notes-preview {
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.no-logs {
+  text-align: center;
+  padding: 48px 0;
+}

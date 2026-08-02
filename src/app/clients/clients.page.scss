@@ -1,0 +1,22 @@
+.client-avatar {
+  width: 100%;
+  height: 100%;
+  background: var(--ion-color-primary-tint, #dbeafe);
+  color: var(--ion-color-primary, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 50%;
+}
+
+.status-badge {
+  float: right;
+  font-size: 0.75rem;
+}
+
+.no-clients {
+  text-align: center;
+  padding: 48px 0;
+}

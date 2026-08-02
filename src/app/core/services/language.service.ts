@@ -13,10 +13,10 @@ export class LanguageService {
 
   async initialize(): Promise<void> {
     this.translate.addLangs(SUPPORTED_LANGUAGES);
-    this.translate.setDefaultLang('es');
 
     const saved = await this.getSavedLanguage();
-    const lang = saved ?? this.getBrowserLang() ?? 'es';
+    // Default is strictly Spanish ('es') unless the user explicitly saved a different preference
+    const lang = saved ?? 'es';
     await this.setLanguage(lang);
   }
 
@@ -26,7 +26,11 @@ export class LanguageService {
   }
 
   getCurrentLanguage(): SupportedLanguage {
-    return (this.translate.currentLang as SupportedLanguage) ?? 'es';
+    const current = this.translate.currentLang();
+    if (current && SUPPORTED_LANGUAGES.includes(current as SupportedLanguage)) {
+      return current as SupportedLanguage;
+    }
+    return 'es';
   }
 
   private async getSavedLanguage(): Promise<SupportedLanguage | null> {
@@ -35,12 +39,5 @@ export class LanguageService {
       return value as SupportedLanguage;
     }
     return null;
-  }
-
-  private getBrowserLang(): SupportedLanguage | null {
-    const browserLang = navigator.language.split('-')[0];
-    return SUPPORTED_LANGUAGES.includes(browserLang as SupportedLanguage)
-      ? (browserLang as SupportedLanguage)
-      : null;
   }
 }

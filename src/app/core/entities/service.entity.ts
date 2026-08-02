@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { WorkLog } from './work-log.entity';
+import type { WorkLog } from './work-log.entity';
 
 @Entity('services')
 export class Service {
@@ -9,6 +9,6 @@ export class Service {
   @Column({ type: 'varchar', unique: true, nullable: false })
   name!: string;
 
-  @OneToMany(() => WorkLog, (workLog) => workLog.service)
+  @OneToMany('WorkLog', (workLog: WorkLog) => workLog.service)
   workLogs!: WorkLog[];
 }

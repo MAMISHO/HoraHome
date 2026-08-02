@@ -1,0 +1,135 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>{{ 'REPORTS.TITLE' | translate }} & {{ 'CLOUD_SYNC.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- 1. Selector de Idioma -->
+  <ion-card class="section-card">
+    <ion-card-header>
+      <ion-card-title>{{ 'LANGUAGE.TITLE' | translate }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-segment [value]="currentLang" (ionChange)="onLanguageChange($event)">
+        <ion-segment-button value="es">
+          <ion-label>🇪🇸 {{ 'LANGUAGE.ES' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="en">
+          <ion-label>🇬🇧 {{ 'LANGUAGE.EN' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="fr">
+          <ion-label>🇫🇷 {{ 'LANGUAGE.FR' | translate }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 2. Motor de Reportes y Filtros -->
+  <ion-card class="section-card">
+    <ion-card-header>
+      <ion-card-title>{{ 'REPORTS.TITLE' | translate }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">Filtro temporal</ion-label>
+        <ion-select [(ngModel)]="periodType" (ionChange)="generateReport()">
+          <ion-select-option value="today">{{ 'REPORTS.TODAY' | translate }}</ion-select-option>
+          <ion-select-option value="week">{{ 'REPORTS.THIS_WEEK' | translate }}</ion-select-option>
+          <ion-select-option value="month">{{ 'REPORTS.THIS_MONTH' | translate }}</ion-select-option>
+          <ion-select-option value="year">{{ 'REPORTS.THIS_YEAR' | translate }}</ion-select-option>
+          <ion-select-option value="custom">{{ 'REPORTS.CUSTOM_RANGE' | translate }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div *ngIf="periodType === 'custom'" class="date-range-row ion-margin-bottom">
+        <ion-item fill="outline">
+          <ion-label position="stacked">{{ 'REPORTS.FROM' | translate }}</ion-label>
+          <ion-input type="date" [(ngModel)]="customStartDate" (ionChange)="generateReport()"></ion-input>
+        </ion-item>
+        <ion-item fill="outline">
+          <ion-label position="stacked">{{ 'REPORTS.TO' | translate }}</ion-label>
+          <ion-input type="date" [(ngModel)]="customEndDate" (ionChange)="generateReport()"></ion-input>
+        </ion-item>
+      </div>
+
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
+        <ion-select [(ngModel)]="filterClientId" (ionChange)="generateReport()">
+          <ion-select-option value="">{{ 'REPORTS.ALL_CLIENTS' | translate }}</ion-select-option>
+          <ion-select-option *ngFor="let c of clients" [value]="c.id">{{ c.name }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Resultados del Reporte -->
+      <div class="report-summary">
+        <div class="metric">
+          <span class="metric-label">{{ 'REPORTS.TOTAL_HOURS' | translate }}</span>
+          <span class="metric-value">{{ totalHours }} h</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">{{ 'REPORTS.ESTIMATED_EARNINGS' | translate }}</span>
+          <span class="metric-value earnings">{{ estimatedEarnings }} €</span>
+        </div>
+      </div>
+
+      <!-- Desglose por Servicio -->
+      <div class="service-subtotals" *ngIf="serviceSubtotals.length > 0">
+        <h4>{{ 'DASHBOARD.SERVICES_BREAKDOWN' | translate }}</h4>
+        <ion-chip *ngFor="let sub of serviceSubtotals">
+          <ion-label>{{ ('SERVICES.' + sub.name) | translate }}: {{ sub.hours }}h</ion-label>
+        </ion-chip>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 3. Sección Autenticación y Copia de Seguridad en Google Drive -->
+  <ion-card class="section-card">
+    <ion-card-header>
+      <ion-card-title>{{ 'CLOUD_SYNC.TITLE' | translate }} (Google Drive)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngIf="currentUser(); else loginBlock" class="user-block">
+        <ion-item lines="none">
+          <ion-avatar slot="start" *ngIf="currentUser()?.imageUrl">
+            <img [src]="currentUser()?.imageUrl" alt="User avatar" />
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ currentUser()?.name }}</h2>
+            <p>{{ currentUser()?.email }}</p>
+          </ion-label>
+          <ion-button slot="end" fill="clear" color="danger" (click)="signOut()">
+            {{ 'CLOUD_SYNC.SIGN_OUT' | translate }}
+          </ion-button>
+        </ion-item>
+
+        <div class="sync-actions ion-margin-top">
+          <ion-button expand="block" color="primary" (click)="backupNow()" [disabled]="isSyncing">
+            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+            {{ 'CLOUD_SYNC.BACKUP_NOW' | translate }}
+          </ion-button>
+
+          <ion-button expand="block" fill="outline" color="secondary" (click)="restoreData()" [disabled]="isSyncing">
+            <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
+            {{ 'CLOUD_SYNC.RESTORE' | translate }}
+          </ion-button>
+        </div>
+
+        <p class="last-backup-text">
+          {{ 'CLOUD_SYNC.LAST_BACKUP' | translate }}:
+          <strong>{{ lastBackupTime ? (lastBackupTime | date:'dd/MM/yyyy HH:mm') : ('CLOUD_SYNC.NEVER' | translate) }}</strong>
+        </p>
+      </div>
+
+      <ng-template #loginBlock>
+        <div class="login-container">
+          <p>{{ 'CLOUD_SYNC.SIGNED_IN_AS' | translate }}: {{ 'CLOUD_SYNC.NEVER' | translate }}</p>
+          <ion-button expand="block" color="primary" (click)="signIn()">
+            <ion-icon name="logo-google" slot="start"></ion-icon>
+            {{ 'CLOUD_SYNC.SIGN_IN' | translate }}
+          </ion-button>
+        </div>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

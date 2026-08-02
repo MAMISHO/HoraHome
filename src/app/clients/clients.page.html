@@ -1,0 +1,47 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>{{ 'CLIENTS.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openClientModal()">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Filtro Mostrar Inactivos -->
+  <ion-item lines="none" class="ion-margin-bottom">
+    <ion-label>{{ 'CLIENTS.SHOW_INACTIVE' | translate }}</ion-label>
+    <ion-toggle slot="end" [(ngModel)]="showInactive" (ionChange)="loadClients()"></ion-toggle>
+  </ion-item>
+
+  <!-- Lista de Clientes -->
+  <ion-list *ngIf="displayedClients.length > 0">
+    <ion-item *ngFor="let client of displayedClients" (click)="openClientModal(client)" button>
+      <ion-avatar slot="start">
+        <div class="client-avatar">{{ client.name.charAt(0).toUpperCase() }}</div>
+      </ion-avatar>
+      <ion-label>
+        <h2>
+          <strong>{{ client.name }}</strong>
+          <ion-badge [color]="client.isActive ? 'success' : 'medium'" class="status-badge">
+            {{ (client.isActive ? 'CLIENTS.ACTIVE' : 'CLIENTS.INACTIVE') | translate }}
+          </ion-badge>
+        </h2>
+        <p *ngIf="client.phone"><ion-icon name="call-outline"></ion-icon> {{ client.phone }}</p>
+        <p *ngIf="client.hourlyRate > 0"><ion-icon name="cash-outline"></ion-icon> {{ client.hourlyRate }} €/h</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <div *ngIf="displayedClients.length === 0" class="no-clients">
+    <ion-text color="medium">{{ 'WORK_LOGS.NO_LOGS' | translate }}</ion-text>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="openClientModal()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

@@ -1,0 +1,146 @@
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+
+  .month-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin: 0;
+  }
+}
+
+.legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--ion-color-light, #f4f5f8);
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+
+      &.working-holiday-dot {
+        background: var(--ion-color-danger, #ef4444);
+      }
+      &.worked-dot {
+        background: var(--ion-color-success, #22c55e);
+      }
+    }
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  background: var(--ion-color-light, #f4f5f8);
+  padding: 8px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+
+  .weekday-header {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ion-color-medium);
+    padding: 6px 0;
+    text-transform: uppercase;
+  }
+
+  .calendar-day {
+    min-height: 54px;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid transparent;
+
+    &.other-month {
+      opacity: 0.35;
+    }
+
+    &.is-today {
+      border-color: var(--ion-color-primary);
+      background: rgba(var(--ion-color-primary-rgb), 0.05);
+    }
+
+    /* Festivo laboral en día de semana (rojo/destacado - no se trabaja) */
+    &.is-working-holiday {
+      background: var(--ion-color-danger-tint, #fef2f2);
+      border-color: var(--ion-color-danger-shade, #b91c1c);
+      .day-number {
+        color: var(--ion-color-danger-shade, #b91c1c);
+        font-weight: 800;
+      }
+    }
+
+    /* Festivo estándar (amarillo/dorado) */
+    &.is-holiday:not(.is-working-holiday) {
+      background: var(--ion-color-warning-tint, #fff8e1);
+      .day-number {
+        color: var(--ion-color-warning-shade, #b78103);
+        font-weight: 700;
+      }
+    }
+
+    .day-number {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .day-indicators {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: flex-end;
+
+      .working-holiday-tag {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+      }
+
+      .holiday-tag {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+      }
+
+      .hours-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        border-radius: 6px;
+      }
+    }
+  }
+}
+
+.selected-day-card {
+  margin: 0;
+  border-radius: 12px;
+
+  .empty-day {
+    text-align: center;
+    padding: 12px 0;
+
+    p {
+      color: var(--ion-color-medium);
+      margin-bottom: 8px;
+    }
+  }
+}

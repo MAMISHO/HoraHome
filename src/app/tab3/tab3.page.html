@@ -1,17 +1,58 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>{{ 'WORK_LOGS.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      [(ngModel)]="searchQuery"
+      (ionInput)="filterLogs()"
+      [placeholder]="'WORK_LOGS.SEARCH_PLACEHOLDER' | translate"
+    ></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Filtro por Cliente -->
+  <ion-item fill="outline" class="ion-margin-bottom">
+    <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
+    <ion-select [(ngModel)]="filterClientId" (ionChange)="filterLogs()">
+      <ion-select-option value="">{{ 'WORK_LOGS.ALL_CLIENTS' | translate }}</ion-select-option>
+      <ion-select-option *ngFor="let client of clients" [value]="client.id">
+        {{ client.name }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- Lista de Registros Cronológica Descendente -->
+  <ion-list *ngIf="filteredLogs.length > 0">
+    <ion-item-sliding *ngFor="let log of filteredLogs">
+      <ion-item (click)="editLog(log)">
+        <ion-label>
+          <h2>
+            <strong>{{ log.client.name }}</strong>
+            <span class="hours-badge">{{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</span>
+          </h2>
+          <p>
+            {{ ('SERVICES.' + log.service.name) | translate }} • {{ log.workDate | date:'fullDate' }}
+          </p>
+          <p *ngIf="log.notes" class="notes-preview">
+            <em>"{{ log.notes }}"</em>
+          </p>
+        </ion-label>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option color="primary" (click)="editLog(log)">
+          <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger" (click)="confirmDeleteLog(log)">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <div *ngIf="filteredLogs.length === 0" class="no-logs">
+    <ion-text color="medium">{{ 'WORK_LOGS.NO_LOGS' | translate }}</ion-text>
+  </div>
 </ion-content>

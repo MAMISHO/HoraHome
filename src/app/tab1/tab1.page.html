@@ -1,17 +1,78 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>{{ 'DASHBOARD.TITLE' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
+      <ion-title size="large">{{ 'DASHBOARD.TITLE' | translate }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <!-- 1. KPI Principal (Horas del Mes & Comparativa) -->
+  <ion-card class="kpi-card">
+    <ion-card-header>
+      <ion-card-subtitle>{{ 'DASHBOARD.THIS_MONTH' | translate }}</ion-card-subtitle>
+      <ion-card-title class="kpi-value">{{ monthlyHours }} <small>{{ 'DASHBOARD.HOURS' | translate }}</small></ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="comparison" [class.positive]="monthDiff >= 0" [class.negative]="monthDiff < 0">
+        <ion-icon [name]="monthDiff >= 0 ? 'trending-up-outline' : 'trending-down-outline'"></ion-icon>
+        <span>{{ monthDiff >= 0 ? '+' : '' }}{{ monthDiff }} hrs {{ 'DASHBOARD.VS_LAST_MONTH' | translate }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 2. Cliente Top & Banner de Festivo Cercano -->
+  <div class="row-cards">
+    <ion-card class="mini-card" *ngIf="topClientName">
+      <ion-card-header>
+        <ion-card-subtitle>{{ 'DASHBOARD.TOP_CLIENT' | translate }}</ion-card-subtitle>
+        <ion-card-title class="top-client-title">{{ topClientName }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <span>{{ topClientHours }} {{ 'COMMON.HOURS_SHORT' | translate }}</span>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="mini-card holiday-card">
+      <ion-card-header>
+        <ion-card-subtitle>{{ 'DASHBOARD.NEXT_HOLIDAY' | translate }}</ion-card-subtitle>
+        <ion-card-title class="holiday-title">
+          {{ nextHoliday ? (nextHoliday.holidayDate | date:'d MMM') : ('DASHBOARD.NO_HOLIDAY' | translate) }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content *ngIf="nextHoliday">
+        <span class="holiday-name">{{ nextHolidayName }}</span>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- 3. Gráfico Resumen por Servicio -->
+  <ion-card class="chart-card">
+    <ion-card-header>
+      <ion-card-title>{{ 'DASHBOARD.SERVICES_BREAKDOWN' | translate }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="chart-container" *ngIf="hasChartData">
+        <canvas baseChart
+          [data]="donutChartData"
+          [type]="'doughnut'"
+          [options]="chartOptions">
+        </canvas>
+      </div>
+      <div class="no-data" *ngIf="!hasChartData">
+        <ion-text color="medium">{{ 'WORK_LOGS.NO_LOGS' | translate }}</ion-text>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 4. Quick-Add FAB (Registrar Hoy) -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="secondary" (click)="openQuickLogModal()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

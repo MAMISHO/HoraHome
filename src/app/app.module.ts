@@ -39,7 +39,7 @@ export function initializeApp(
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideTranslateService({ defaultLanguage: 'es' }),
+    provideTranslateService({ lang: 'es', fallbackLang: 'es' }),
     provideTranslateHttpLoader({
       prefix: './assets/i18n/',
       suffix: '.json',

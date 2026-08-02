@@ -5,7 +5,11 @@
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "copy-wasm": "node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/sql.js/dist/sql-wasm.wasm')) { fs.copyFileSync('node_modules/sql.js/dist/sql-wasm.wasm', 'src/assets/sql-wasm.wasm'); fs.copyFileSync('node_modules/sql.js/dist/sql-wasm.js', 'src/assets/sql-wasm.js'); }\"",
+    "postinstall": "npm run copy-wasm",
+    "prebuild": "npm run copy-wasm",
+    "prestart": "npm run copy-wasm",
+    "start": "npx ionic serve --port 8100 --no-open",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -40,6 +44,7 @@
     "ng2-charts": "^9.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "~7.8.0",
+    "sql.js": "1.8.0",
     "tslib": "^2.3.0",
     "typeorm": "^1.1.0",
     "zone.js": "~0.15.0"
@@ -57,6 +62,7 @@
     "@capacitor/cli": "8.5.0",
     "@ionic/angular-toolkit": "^12.0.0",
     "@types/jasmine": "~5.1.0",
+    "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^9.16.0",
