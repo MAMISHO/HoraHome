@@ -1,0 +1,101 @@
+{
+  "TABS": {
+    "DASHBOARD": "Accueil",
+    "CALENDAR": "Calendrier",
+    "WORK_LOGS": "Historique",
+    "CLIENTS": "Clients",
+    "REPORTS": "Rapports"
+  },
+  "DASHBOARD": {
+    "TITLE": "Tableau de bord",
+    "THIS_MONTH": "Ce mois",
+    "HOURS": "heures",
+    "VS_LAST_MONTH": "vs mois précédent",
+    "TOP_CLIENT": "Client principal",
+    "NEXT_HOLIDAY": "Prochain jour férié",
+    "NO_HOLIDAY": "Aucun jour férié à venir",
+    "SERVICES_BREAKDOWN": "Par service",
+    "REGISTER_TODAY": "Enregistrer aujourd'hui"
+  },
+  "CALENDAR": {
+    "TITLE": "Calendrier",
+    "HOLIDAY": "Jour férié",
+    "SELECT_DATE": "Sélectionner une date",
+    "WORKED_HOLIDAY": "Jour férié travaillé"
+  },
+  "WORK_LOGS": {
+    "TITLE": "Historique de travail",
+    "SEARCH_PLACEHOLDER": "Rechercher dans les notes…",
+    "ALL_CLIENTS": "Tous les clients",
+    "NO_LOGS": "Aucun enregistrement",
+    "DELETE_CONFIRM": "Supprimer {{hours}} heures de {{client}} ?",
+    "CANCEL": "Annuler",
+    "DELETE": "Supprimer",
+    "UNDO": "Annuler",
+    "DELETED": "Enregistrement supprimé",
+    "EDIT": "Modifier",
+    "SAVE": "Enregistrer",
+    "HOLIDAY_BADGE": "Férié"
+  },
+  "CLIENTS": {
+    "TITLE": "Clients",
+    "NEW_CLIENT": "Nouveau client",
+    "EDIT_CLIENT": "Modifier le client",
+    "NAME": "Nom",
+    "ADDRESS": "Adresse",
+    "PHONE": "Téléphone",
+    "HOURLY_RATE": "Tarif horaire (€)",
+    "ACTIVE": "Actif",
+    "INACTIVE": "Inactif",
+    "SHOW_INACTIVE": "Afficher les inactifs",
+    "SAVE": "Enregistrer",
+    "CANCEL": "Annuler"
+  },
+  "REPORTS": {
+    "TITLE": "Rapports",
+    "TODAY": "Aujourd'hui",
+    "THIS_WEEK": "Cette semaine",
+    "THIS_MONTH": "Ce mois",
+    "THIS_YEAR": "Cette année",
+    "CUSTOM_RANGE": "Plage personnalisée",
+    "FROM": "Du",
+    "TO": "Au",
+    "TOTAL_HOURS": "Total des heures",
+    "ESTIMATED_EARNINGS": "Revenus estimés",
+    "ALL_CLIENTS": "Tous les clients",
+    "SELECT_CLIENT": "Sélectionner un client"
+  },
+  "CLOUD_SYNC": {
+    "TITLE": "Sauvegarde",
+    "SIGNED_IN_AS": "Connecté en tant que",
+    "SIGN_IN": "Se connecter avec Google",
+    "SIGN_OUT": "Se déconnecter",
+    "BACKUP_NOW": "Sauvegarder maintenant",
+    "RESTORE": "Restaurer les données",
+    "LAST_BACKUP": "Dernière sauvegarde",
+    "NEVER": "Jamais",
+    "BACKUP_SUCCESS": "Sauvegarde réussie",
+    "BACKUP_ERROR": "Échec de la sauvegarde",
+    "RESTORE_SUCCESS": "Données restaurées avec succès",
+    "RESTORE_ERROR": "Échec de la restauration"
+  },
+  "SERVICES": {
+    "Cleaning": "Nettoyage",
+    "Childcare": "Garde d'enfants",
+    "Ironing": "Repassage",
+    "Cooking": "Cuisine"
+  },
+  "COMMON": {
+    "HOURS_SHORT": "h",
+    "LOADING": "Chargement…",
+    "ERROR": "Erreur inattendue",
+    "OK": "OK",
+    "CLOSE": "Fermer"
+  },
+  "LANGUAGE": {
+    "TITLE": "Langue",
+    "ES": "Español",
+    "EN": "English",
+    "FR": "Français"
+  }
+}

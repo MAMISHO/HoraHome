@@ -1,0 +1,101 @@
+{
+  "TABS": {
+    "DASHBOARD": "Home",
+    "CALENDAR": "Calendar",
+    "WORK_LOGS": "History",
+    "CLIENTS": "Clients",
+    "REPORTS": "Reports"
+  },
+  "DASHBOARD": {
+    "TITLE": "Overview",
+    "THIS_MONTH": "This month",
+    "HOURS": "hours",
+    "VS_LAST_MONTH": "vs last month",
+    "TOP_CLIENT": "Top client",
+    "NEXT_HOLIDAY": "Next holiday",
+    "NO_HOLIDAY": "No upcoming holidays",
+    "SERVICES_BREAKDOWN": "By service",
+    "REGISTER_TODAY": "Log today"
+  },
+  "CALENDAR": {
+    "TITLE": "Calendar",
+    "HOLIDAY": "Holiday",
+    "SELECT_DATE": "Select a date",
+    "WORKED_HOLIDAY": "Worked holiday"
+  },
+  "WORK_LOGS": {
+    "TITLE": "Work History",
+    "SEARCH_PLACEHOLDER": "Search notes…",
+    "ALL_CLIENTS": "All clients",
+    "NO_LOGS": "No records found",
+    "DELETE_CONFIRM": "Delete {{hours}} hours from {{client}}?",
+    "CANCEL": "Cancel",
+    "DELETE": "Delete",
+    "UNDO": "Undo",
+    "DELETED": "Record deleted",
+    "EDIT": "Edit",
+    "SAVE": "Save",
+    "HOLIDAY_BADGE": "Holiday"
+  },
+  "CLIENTS": {
+    "TITLE": "Clients",
+    "NEW_CLIENT": "New client",
+    "EDIT_CLIENT": "Edit client",
+    "NAME": "Name",
+    "ADDRESS": "Address",
+    "PHONE": "Phone",
+    "HOURLY_RATE": "Hourly rate (€)",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SHOW_INACTIVE": "Show inactive",
+    "SAVE": "Save",
+    "CANCEL": "Cancel"
+  },
+  "REPORTS": {
+    "TITLE": "Reports",
+    "TODAY": "Today",
+    "THIS_WEEK": "This week",
+    "THIS_MONTH": "This month",
+    "THIS_YEAR": "This year",
+    "CUSTOM_RANGE": "Custom range",
+    "FROM": "From",
+    "TO": "To",
+    "TOTAL_HOURS": "Total hours",
+    "ESTIMATED_EARNINGS": "Estimated earnings",
+    "ALL_CLIENTS": "All clients",
+    "SELECT_CLIENT": "Select client"
+  },
+  "CLOUD_SYNC": {
+    "TITLE": "Cloud Backup",
+    "SIGNED_IN_AS": "Signed in as",
+    "SIGN_IN": "Sign in with Google",
+    "SIGN_OUT": "Sign out",
+    "BACKUP_NOW": "Backup now",
+    "RESTORE": "Restore data",
+    "LAST_BACKUP": "Last backup",
+    "NEVER": "Never",
+    "BACKUP_SUCCESS": "Backup successful",
+    "BACKUP_ERROR": "Backup failed",
+    "RESTORE_SUCCESS": "Data restored successfully",
+    "RESTORE_ERROR": "Restore failed"
+  },
+  "SERVICES": {
+    "Cleaning": "Cleaning",
+    "Childcare": "Childcare",
+    "Ironing": "Ironing",
+    "Cooking": "Cooking"
+  },
+  "COMMON": {
+    "HOURS_SHORT": "h",
+    "LOADING": "Loading…",
+    "ERROR": "Unexpected error",
+    "OK": "OK",
+    "CLOSE": "Close"
+  },
+  "LANGUAGE": {
+    "TITLE": "Language",
+    "ES": "Español",
+    "EN": "English",
+    "FR": "Français"
+  }
+}

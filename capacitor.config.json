@@ -1,0 +1,17 @@
+{
+  "appId": "com.horahome.app",
+  "appName": "HoraHome",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": [
+        "profile",
+        "email",
+        "https://www.googleapis.com/auth/drive.appdata"
+      ],
+      "serverClientId": "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "TABS": {
+    "DASHBOARD": "Inicio",
+    "CALENDAR": "Calendario",
+    "WORK_LOGS": "Historial",
+    "CLIENTS": "Clientes",
+    "REPORTS": "Reportes"
+  },
+  "DASHBOARD": {
+    "TITLE": "Resumen",
+    "THIS_MONTH": "Este mes",
+    "HOURS": "horas",
+    "VS_LAST_MONTH": "vs mes anterior",
+    "TOP_CLIENT": "Cliente principal",
+    "NEXT_HOLIDAY": "Próximo festivo",
+    "NO_HOLIDAY": "Sin festivos próximos",
+    "SERVICES_BREAKDOWN": "Por servicio",
+    "REGISTER_TODAY": "Registrar hoy"
+  },
+  "CALENDAR": {
+    "TITLE": "Calendario",
+    "HOLIDAY": "Festivo",
+    "SELECT_DATE": "Selecciona una fecha",
+    "WORKED_HOLIDAY": "Festivo trabajado"
+  },
+  "WORK_LOGS": {
+    "TITLE": "Historial de trabajo",
+    "SEARCH_PLACEHOLDER": "Buscar en notas…",
+    "ALL_CLIENTS": "Todos los clientes",
+    "NO_LOGS": "No hay registros",
+    "DELETE_CONFIRM": "¿Eliminar {{hours}} horas de {{client}}?",
+    "CANCEL": "Cancelar",
+    "DELETE": "Eliminar",
+    "UNDO": "Deshacer",
+    "DELETED": "Registro eliminado",
+    "EDIT": "Editar",
+    "SAVE": "Guardar",
+    "HOLIDAY_BADGE": "Festivo"
+  },
+  "CLIENTS": {
+    "TITLE": "Clientes",
+    "NEW_CLIENT": "Nuevo cliente",
+    "EDIT_CLIENT": "Editar cliente",
+    "NAME": "Nombre",
+    "ADDRESS": "Dirección",
+    "PHONE": "Teléfono",
+    "HOURLY_RATE": "Tarifa/hora (€)",
+    "ACTIVE": "Activo",
+    "INACTIVE": "Inactivo",
+    "SHOW_INACTIVE": "Mostrar inactivos",
+    "SAVE": "Guardar",
+    "CANCEL": "Cancelar"
+  },
+  "REPORTS": {
+    "TITLE": "Reportes",
+    "TODAY": "Hoy",
+    "THIS_WEEK": "Esta semana",
+    "THIS_MONTH": "Este mes",
+    "THIS_YEAR": "Este año",
+    "CUSTOM_RANGE": "Rango personalizado",
+    "FROM": "Desde",
+    "TO": "Hasta",
+    "TOTAL_HOURS": "Total horas",
+    "ESTIMATED_EARNINGS": "Ingresos estimados",
+    "ALL_CLIENTS": "Todos los clientes",
+    "SELECT_CLIENT": "Seleccionar cliente"
+  },
+  "CLOUD_SYNC": {
+    "TITLE": "Copia de seguridad",
+    "SIGNED_IN_AS": "Sesión iniciada como",
+    "SIGN_IN": "Iniciar sesión con Google",
+    "SIGN_OUT": "Cerrar sesión",
+    "BACKUP_NOW": "Hacer copia ahora",
+    "RESTORE": "Restaurar datos",
+    "LAST_BACKUP": "Último respaldo",
+    "NEVER": "Nunca",
+    "BACKUP_SUCCESS": "Copia realizada con éxito",
+    "BACKUP_ERROR": "Error al realizar la copia",
+    "RESTORE_SUCCESS": "Datos restaurados con éxito",
+    "RESTORE_ERROR": "Error al restaurar datos"
+  },
+  "SERVICES": {
+    "Cleaning": "Limpieza",
+    "Childcare": "Cuidado de niños",
+    "Ironing": "Planchado",
+    "Cooking": "Cocina"
+  },
+  "COMMON": {
+    "HOURS_SHORT": "h",
+    "LOADING": "Cargando…",
+    "ERROR": "Error inesperado",
+    "OK": "Aceptar",
+    "CLOSE": "Cerrar"
+  },
+  "LANGUAGE": {
+    "TITLE": "Idioma",
+    "ES": "Español",
+    "EN": "English",
+    "FR": "Français"
+  }
+}
