@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
 
 export interface IDatabaseStrategy {
-  createDataSource(): Promise<DataSource>;
+  createDataSource(synchronize?: boolean): Promise<DataSource>;
 }

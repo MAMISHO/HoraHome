@@ -35,7 +35,29 @@
     "DELETED": "Registro eliminado",
     "EDIT": "Editar",
     "SAVE": "Guardar",
-    "HOLIDAY_BADGE": "Festivo"
+    "HOLIDAY_BADGE": "Festivo",
+    "SHARE": "Compartir",
+    "SHARE_TITLE": "Resumen de Horas",
+    "SHARE_HEADER": "*Resumen de Trabajo*",
+    "SHARE_PERIOD": "*Período:*",
+    "SHARE_CLIENT": "*Cliente:*",
+    "SHARE_DETAIL": "*Detalle por día:*",
+    "SHARE_TOTAL": "*Total:*",
+    "SHARE_ALL_CLIENTS": "*Resumen de Todos los Clientes*",
+    "COPIED_TO_CLIPBOARD": "Resumen copiado al portapapeles",
+    "PERIOD_MONTH": "Mes",
+    "PERIOD_CUSTOM": "Rango personalizado",
+    "PERIOD_ALL": "Todo",
+    "TOTAL_HOURS_FILTERED": "Total de horas en este período: {{total}}h",
+    "SELECT_CLIENT_PLACEHOLDER": "Selecciona un cliente",
+    "WARN_END_TIME_INVALID": "La hora de fin debe ser posterior a la de inicio.",
+    "WARN_HOURS_OVERLAP": "Las horas se solapan con otro registro de este día.",
+    "SELECT_SHARE_ACTION": "Compartir historial de trabajo",
+    "SHARE_WHATSAPP_FR": "WhatsApp (Francés)",
+    "SHARE_WHATSAPP_ES": "WhatsApp (Español)",
+    "SHARE_WHATSAPP_EN": "WhatsApp (Inglés)",
+    "SHARE_OTHER_APPS": "Otras aplicaciones / Más opciones",
+    "SHARE_COPY": "Copiar al portapapeles"
   },
   "CLIENTS": {
     "TITLE": "Clientes",
@@ -88,6 +110,7 @@
   "COMMON": {
     "HOURS_SHORT": "h",
     "LOADING": "Cargando…",
+    "SAVING": "Guardando…",
     "ERROR": "Error inesperado",
     "OK": "Aceptar",
     "CLOSE": "Cerrar"

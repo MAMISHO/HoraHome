@@ -4,5 +4,5 @@
     <string name="title_activity_main">HoraHome</string>
     <string name="package_name">es.codebros.horahome</string>
     <string name="custom_url_scheme">es.codebros.horahome</string>
-    <string name="server_client_id">YOUR_WEB_CLIENT_ID.apps.googleusercontent.com</string>
+    <string name="server_client_id">600666480536-lgr1t0igdnuhdg2aecui6s8ljg2o3ctu.apps.googleusercontent.com</string>
 </resources>

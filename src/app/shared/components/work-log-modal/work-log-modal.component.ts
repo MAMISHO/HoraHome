@@ -1,11 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController, LoadingController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { DatabaseService } from '../../../core/services/database.service';
 import { Client } from '../../../core/entities/client.entity';
 import { Service } from '../../../core/entities/service.entity';
 import { WorkLog } from '../../../core/entities/work-log.entity';
 import { LanguageService } from '../../../core/services/language.service';
+import { SyncManagerService } from '../../../core/services/sync-manager.service';
 
 @Component({
   selector: 'app-work-log-modal',
@@ -27,6 +28,8 @@ export class WorkLogModalComponent implements OnInit {
   selectedClientId = '';
   selectedServiceId = '';
   hours = 4.0;
+  startTime = '09:00';
+  endTime = '17:00';
   notes = '';
 
   isHoliday = false;
@@ -39,10 +42,12 @@ export class WorkLogModalComponent implements OnInit {
   constructor(
     private modalCtrl: ModalController,
     private alertCtrl: AlertController,
+    private loadingCtrl: LoadingController,
     private dbService: DatabaseService,
     public langService: LanguageService,
-    private translate: TranslateService
-  ) {}
+    private translate: TranslateService,
+    private syncManager: SyncManagerService
+  ) { }
 
   get currentLang(): string {
     return this.langService.getCurrentLanguage();
@@ -96,22 +101,69 @@ export class WorkLogModalComponent implements OnInit {
     this.selectedClientId = log.client.id;
     this.selectedServiceId = log.service.id;
     this.hours = Number(log.hours);
+    this.startTime = log.startTime || '09:00';
+    this.endTime = log.endTime || this.calculateEndTime('09:00', this.hours);
     this.notes = log.notes || '';
   }
 
   resetForm(): void {
     this.isEdit = false;
     this.editingLogId = null;
-    if (this.initialClientId) {
-      this.selectedClientId = this.initialClientId;
-    } else if (this.activeClients.length > 0) {
-      this.selectedClientId = this.activeClients[0].id;
-    }
+    this.selectedClientId = ''; // El cliente no puede venir preseleccionado
     if (this.services.length > 0) {
       this.selectedServiceId = this.services[0].id;
     }
     this.hours = 4.0;
+
+    // Buscar la hora de fin del anterior registro del mismo día
+    let start = '09:00';
+    if (this.dateLogs && this.dateLogs.length > 0) {
+      const withEndTime = this.dateLogs.filter(l => l.endTime);
+      if (withEndTime.length > 0) {
+        const sorted = [...withEndTime].sort((a, b) => (a.endTime || '').localeCompare(b.endTime || ''));
+        start = sorted[sorted.length - 1].endTime || '09:00';
+      }
+    }
+    this.startTime = start;
+    this.endTime = this.calculateEndTime(this.startTime, this.hours);
     this.notes = '';
+  }
+
+  isValidForm(): boolean {
+    if (!this.selectedClientId) return false;
+    if (!this.selectedServiceId) return false;
+    if (!this.workDate) return false;
+    if (!this.hours || this.hours < 0.5 || this.hours > 24.0) return false;
+    if (!this.startTime || !this.endTime) return false;
+    if (this.endTime <= this.startTime) return false;
+    if (this.hasOverlap()) return false;
+    return true;
+  }
+
+  hasOverlap(): boolean {
+    if (!this.startTime || !this.endTime) return false;
+    return this.dateLogs.some(log => {
+      if (this.isEdit && log.id === this.editingLogId) return false;
+      if (!log.startTime || !log.endTime) return false;
+      return this.startTime < log.endTime && log.startTime < this.endTime;
+    });
+  }
+
+  async onDateChange(): Promise<void> {
+    await this.loadDateLogs();
+    await this.checkHoliday();
+    if (!this.isEdit) {
+      let start = '09:00';
+      if (this.dateLogs && this.dateLogs.length > 0) {
+        const withEndTime = this.dateLogs.filter(l => l.endTime);
+        if (withEndTime.length > 0) {
+          const sorted = [...withEndTime].sort((a, b) => (a.endTime || '').localeCompare(b.endTime || ''));
+          start = sorted[sorted.length - 1].endTime || '09:00';
+        }
+      }
+      this.startTime = start;
+      this.endTime = this.calculateEndTime(this.startTime, this.hours);
+    }
   }
 
   startNewRegistration(): void {
@@ -155,6 +207,7 @@ export class WorkLogModalComponent implements OnInit {
     if (this.dbService.isReady()) {
       await this.dbService.workLogRepo.remove(log);
       this.hasSavedChanges = true;
+      this.syncManager.syncInBackground();
       await this.loadDateLogs();
       if (this.dateLogs.length === 0) {
         this.startNewRegistration();
@@ -181,39 +234,81 @@ export class WorkLogModalComponent implements OnInit {
     }
   }
 
+  onTimeChange(): void {
+    if (this.startTime && this.endTime) {
+      const [sh, sm] = this.startTime.split(':').map(Number);
+      const [eh, em] = this.endTime.split(':').map(Number);
+      let diffMins = (eh * 60 + em) - (sh * 60 + sm);
+      if (diffMins < 0) {
+        // Asumir que termina al día siguiente o valor nulo si es menor
+        diffMins = 0;
+      }
+      const rawHours = diffMins / 60;
+      // Redondear a la fracción de 30 minutos más cercana
+      const rounded = Math.round(rawHours * 2) / 2;
+      this.hours = Math.max(0.5, Math.min(24.0, rounded));
+    }
+  }
+
+  private calculateEndTime(start: string, hours: number): string {
+    const [sh, sm] = start.split(':').map(Number);
+    const totalMins = (sh * 60 + sm) + (hours * 60);
+    const eh = Math.floor(totalMins / 60) % 24;
+    const em = Math.floor(totalMins % 60);
+    return `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+  }
+
   adjustHours(delta: number): void {
     const next = Math.round((this.hours + delta) * 2) / 2;
     if (next >= 0.5 && next <= 24) {
       this.hours = next;
+      if (this.startTime) {
+        this.endTime = this.calculateEndTime(this.startTime, this.hours);
+      }
     }
   }
 
   async save(): Promise<void> {
-    if (!this.selectedClientId || !this.selectedServiceId) return;
+    if (!this.isValidForm()) return;
 
-    const client = await this.dbService.clientRepo.findOneBy({ id: this.selectedClientId });
-    const service = await this.dbService.serviceRepo.findOneBy({ id: this.selectedServiceId });
-    if (!client || !service) return;
+    const loading = await this.loadingCtrl.create({
+      message: this.translate.instant('COMMON.SAVING') || 'Guardando…',
+      spinner: 'crescent'
+    });
+    await loading.present();
 
-    let log: WorkLog;
-    if (this.isEdit && this.editingLogId) {
-      const existing = await this.dbService.workLogRepo.findOneBy({ id: this.editingLogId });
-      log = existing || this.dbService.workLogRepo.create();
-    } else {
-      log = this.dbService.workLogRepo.create();
+    try {
+      const client = await this.dbService.clientRepo.findOneBy({ id: this.selectedClientId });
+      const service = await this.dbService.serviceRepo.findOneBy({ id: this.selectedServiceId });
+      if (!client || !service) return;
+
+      let log: WorkLog;
+      if (this.isEdit && this.editingLogId) {
+        const existing = await this.dbService.workLogRepo.findOneBy({ id: this.editingLogId });
+        log = existing || this.dbService.workLogRepo.create();
+      } else {
+        log = this.dbService.workLogRepo.create();
+      }
+
+      log.workDate = this.workDate;
+      log.client = client;
+      log.service = service;
+      log.hours = this.hours;
+      log.startTime = this.startTime || undefined;
+      log.endTime = this.endTime || undefined;
+      log.notes = this.notes.trim() || undefined;
+
+      await this.dbService.workLogRepo.save(log);
+      this.hasSavedChanges = true;
+      this.syncManager.syncInBackground();
+
+      await this.loadDateLogs();
+      this.activeTab = 'list';
+    } catch (err) {
+      console.error('Error saving work log:', err);
+    } finally {
+      await loading.dismiss();
     }
-
-    log.workDate = this.workDate;
-    log.client = client;
-    log.service = service;
-    log.hours = this.hours;
-    log.notes = this.notes.trim() || undefined;
-
-    await this.dbService.workLogRepo.save(log);
-    this.hasSavedChanges = true;
-
-    await this.loadDateLogs();
-    this.activeTab = 'list';
   }
 
   dismiss(): void {

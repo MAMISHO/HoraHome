@@ -9,7 +9,7 @@ import { BrusselsHoliday } from '../../entities/brussels-holiday.entity';
 export class WebDatabaseStrategy implements IDatabaseStrategy {
   constructor(private sqlJsLoader: () => Promise<SqlJsInitFunction>) {}
 
-  async createDataSource(): Promise<DataSource> {
+  async createDataSource(synchronize: boolean = true): Promise<DataSource> {
     const initFn = await this.sqlJsLoader();
     const SQL = await initFn({
       locateFile: (file: string) => `assets/${file}`,
@@ -23,7 +23,7 @@ export class WebDatabaseStrategy implements IDatabaseStrategy {
       location: 'db_horahome',
       autoSave: true,
       logging: false,
-      synchronize: true,
+      synchronize,
       entities: [Client, Service, WorkLog, BrusselsHoliday],
     });
   }

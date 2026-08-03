@@ -35,7 +35,29 @@
     "DELETED": "Enregistrement supprimé",
     "EDIT": "Modifier",
     "SAVE": "Enregistrer",
-    "HOLIDAY_BADGE": "Férié"
+    "HOLIDAY_BADGE": "Férié",
+    "SHARE": "Partager",
+    "SHARE_TITLE": "Résumé des heures",
+    "SHARE_HEADER": "*Résumé du travail*",
+    "SHARE_PERIOD": "*Période :*",
+    "SHARE_CLIENT": "*Client :*",
+    "SHARE_DETAIL": "*Détail quotidien :*",
+    "SHARE_TOTAL": "*Total :*",
+    "SHARE_ALL_CLIENTS": "*Résumé pour tous les clients*",
+    "COPIED_TO_CLIPBOARD": "Résumé copié dans le presse-papiers",
+    "PERIOD_MONTH": "Mois",
+    "PERIOD_CUSTOM": "Période personnalisée",
+    "PERIOD_ALL": "Tout",
+    "TOTAL_HOURS_FILTERED": "Heures totales sur cette période : {{total}}h",
+    "SELECT_CLIENT_PLACEHOLDER": "Sélectionner un client",
+    "WARN_END_TIME_INVALID": "L'heure de fin doit être postérieure à l'heure de début.",
+    "WARN_HOURS_OVERLAP": "Les heures chevauchent un autre enregistrement ce jour-là.",
+    "SELECT_SHARE_ACTION": "Partager l'historique de travail",
+    "SHARE_WHATSAPP_FR": "WhatsApp (Français)",
+    "SHARE_WHATSAPP_ES": "WhatsApp (Espagnol)",
+    "SHARE_WHATSAPP_EN": "WhatsApp (Anglais)",
+    "SHARE_OTHER_APPS": "Autres applications / Plus d'options",
+    "SHARE_COPY": "Copier dans le presse-papiers"
   },
   "CLIENTS": {
     "TITLE": "Clients",
@@ -88,6 +110,7 @@
   "COMMON": {
     "HOURS_SHORT": "h",
     "LOADING": "Chargement…",
+    "SAVING": "Enregistrement…",
     "ERROR": "Erreur inattendue",
     "OK": "OK",
     "CLOSE": "Fermer"

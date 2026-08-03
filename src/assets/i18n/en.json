@@ -35,7 +35,29 @@
     "DELETED": "Record deleted",
     "EDIT": "Edit",
     "SAVE": "Save",
-    "HOLIDAY_BADGE": "Holiday"
+    "HOLIDAY_BADGE": "Holiday",
+    "SHARE": "Share",
+    "SHARE_TITLE": "Hours Summary",
+    "SHARE_HEADER": "*Work Summary*",
+    "SHARE_PERIOD": "*Period:*",
+    "SHARE_CLIENT": "*Client:*",
+    "SHARE_DETAIL": "*Daily detail:*",
+    "SHARE_TOTAL": "*Total:*",
+    "SHARE_ALL_CLIENTS": "*Summary for All Clients*",
+    "COPIED_TO_CLIPBOARD": "Summary copied to clipboard",
+    "PERIOD_MONTH": "Month",
+    "PERIOD_CUSTOM": "Custom range",
+    "PERIOD_ALL": "All",
+    "TOTAL_HOURS_FILTERED": "Total hours in this period: {{total}}h",
+    "SELECT_CLIENT_PLACEHOLDER": "Select a client",
+    "WARN_END_TIME_INVALID": "End time must be after start time.",
+    "WARN_HOURS_OVERLAP": "Hours overlap with another record on this day.",
+    "SELECT_SHARE_ACTION": "Share work history",
+    "SHARE_WHATSAPP_FR": "WhatsApp (French)",
+    "SHARE_WHATSAPP_ES": "WhatsApp (Spanish)",
+    "SHARE_WHATSAPP_EN": "WhatsApp (English)",
+    "SHARE_OTHER_APPS": "Other applications / More options",
+    "SHARE_COPY": "Copy to clipboard"
   },
   "CLIENTS": {
     "TITLE": "Clients",
@@ -88,6 +110,7 @@
   "COMMON": {
     "HOURS_SHORT": "h",
     "LOADING": "Loading…",
+    "SAVING": "Saving…",
     "ERROR": "Unexpected error",
     "OK": "OK",
     "CLOSE": "Close"

@@ -9,7 +9,18 @@ import { BrusselsHoliday } from '../../entities/brussels-holiday.entity';
 export class NativeDatabaseStrategy implements IDatabaseStrategy {
   private sqlite: SQLiteConnection = new SQLiteConnection(CapacitorSQLite);
 
-  async createDataSource(): Promise<DataSource> {
+  async createDataSource(synchronize: boolean = true): Promise<DataSource> {
+    // Cerrar cualquier conexión nativa abierta anteriormente para evitar "Connection already exists"
+    try {
+      const isConn = await this.sqlite.isConnection('db_horahome', false);
+      if (isConn && isConn.result) {
+        await this.sqlite.closeConnection('db_horahome', false);
+        console.log('[NativeDatabaseStrategy] Existing native connection closed.');
+      }
+    } catch (e) {
+      console.warn('[NativeDatabaseStrategy] Error closing native connection:', e);
+    }
+
     // Only check consistency; TypeORM's capacitor driver handles
     // createConnection and open internally via the SQLiteConnection driver.
     await this.sqlite.checkConnectionsConsistency().catch(() => {});
@@ -21,7 +32,7 @@ export class NativeDatabaseStrategy implements IDatabaseStrategy {
       mode: 'no-encryption',
       version: 1,
       logging: ['error', 'warn'],
-      synchronize: true,
+      synchronize,
       entities: [Client, Service, WorkLog, BrusselsHoliday],
     });
   }

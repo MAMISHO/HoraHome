@@ -38,6 +38,12 @@ export class WorkLog {
   @Column({ type: 'decimal', precision: 4, scale: 2, nullable: false })
   hours!: number;
 
+  @Column({ type: 'varchar', nullable: true })
+  startTime?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  endTime?: string;
+
   @Column({ type: 'text', nullable: true })
   notes?: string;
 

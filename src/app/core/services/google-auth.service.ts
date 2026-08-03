@@ -57,7 +57,7 @@ export class GoogleAuthService {
     if (Capacitor.getPlatform() !== 'web') {
       await GoogleAuth.initialize({
         clientId: this.clientId,
-        scopes: ['profile', 'email', 'https://www.googleapis.com/auth/drive.appdata'],
+        scopes: ['profile', 'email', 'https://www.googleapis.com/auth/drive.appdata', 'https://www.googleapis.com/auth/drive.file'],
         grantOfflineAccess: true,
       }).catch((err) => console.warn('[GoogleAuth] init warning:', err));
     }
@@ -95,6 +95,7 @@ export class GoogleAuthService {
 
   async signOut(): Promise<void> {
     try {
+      await this.initialize();
       if (Capacitor.getPlatform() !== 'web') {
         await GoogleAuth.signOut();
       }
@@ -112,10 +113,12 @@ export class GoogleAuthService {
 
     try {
       const refreshed = await GoogleAuth.refresh();
-      if (refreshed?.accessToken && user) {
-        const updated = { ...user, accessToken: refreshed.accessToken };
-        this.currentUser.set(updated);
-        this.saveSession(updated);
+      if (refreshed?.accessToken) {
+        if (user) {
+          const updated = { ...user, accessToken: refreshed.accessToken };
+          this.currentUser.set(updated);
+          this.saveSession(updated);
+        }
         return refreshed.accessToken;
       }
     } catch (err) {

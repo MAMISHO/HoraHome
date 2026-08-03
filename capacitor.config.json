@@ -10,7 +10,7 @@
         "email",
         "https://www.googleapis.com/auth/drive.appdata"
       ],
-      "serverClientId": "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+      "serverClientId": "600666480536-lgr1t0igdnuhdg2aecui6s8ljg2o3ctu.apps.googleusercontent.com",
       "forceCodeForRefreshToken": true
     }
   }

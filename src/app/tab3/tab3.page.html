@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>{{ 'WORK_LOGS.TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="shareLogs()" [disabled]="filteredLogs.length === 0" title="{{ 'WORK_LOGS.SHARE' | translate }}">
+        <ion-icon name="share-social-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
   <ion-toolbar color="primary">
     <ion-searchbar
@@ -12,6 +17,59 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Filtro por Período de Fecha -->
+  <ion-segment [(ngModel)]="filterPeriodType" (ionChange)="filterLogs()" class="period-segment ion-margin-bottom">
+    <ion-segment-button value="month">
+      <ion-label>{{ 'WORK_LOGS.PERIOD_MONTH' | translate }}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="custom">
+      <ion-label>{{ 'WORK_LOGS.PERIOD_CUSTOM' | translate }}</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="all">
+      <ion-label>{{ 'WORK_LOGS.PERIOD_ALL' | translate }}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Controles de navegación de Mes -->
+  <div *ngIf="filterPeriodType === 'month'" class="month-selector-wrapper ion-margin-bottom">
+    <div class="month-navigator">
+      <ion-button fill="clear" size="small" (click)="prevMonth()">
+        <ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      
+      <span class="month-title-label" id="open-month-picker">
+        {{ selectedMonthLabel }} ▾
+      </span>
+      
+      <ion-popover trigger="open-month-picker" showBackdrop="true" dismissOnSelect="true">
+        <ng-template>
+          <ion-datetime
+            presentation="month-year"
+            [value]="selectedMonthDate.toISOString()"
+            min="2025-01-01"
+            (ionChange)="onMonthYearSelected($event)"
+          ></ion-datetime>
+        </ng-template>
+      </ion-popover>
+
+      <ion-button fill="clear" size="small" (click)="nextMonth()">
+        <ion-icon name="chevron-forward-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Controles de Rango Personalizado -->
+  <div *ngIf="filterPeriodType === 'custom'" class="date-range-row ion-margin-bottom">
+    <ion-item fill="outline" class="date-item">
+      <ion-label position="stacked">{{ 'REPORTS.FROM' | translate }}</ion-label>
+      <ion-input type="date" [(ngModel)]="customStartDate" (ionChange)="filterLogs()"></ion-input>
+    </ion-item>
+    <ion-item fill="outline" class="date-item">
+      <ion-label position="stacked">{{ 'REPORTS.TO' | translate }}</ion-label>
+      <ion-input type="date" [(ngModel)]="customEndDate" (ionChange)="filterLogs()"></ion-input>
+    </ion-item>
+  </div>
+
   <!-- Filtro por Cliente -->
   <ion-item fill="outline" class="ion-margin-bottom">
     <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
@@ -23,8 +81,38 @@
     </ion-select>
   </ion-item>
 
+  <!-- Tarjeta con resumen de total horas de filtros -->
+  <div class="total-hours-container ion-margin-bottom" *ngIf="filteredLogs.length > 0">
+    <ion-card class="total-hours-card">
+      <ion-card-content class="ion-no-padding card-content-flex">
+        <ion-icon name="time-outline" class="time-icon"></ion-icon>
+        <span class="total-text">
+          {{ 'WORK_LOGS.TOTAL_HOURS_FILTERED' | translate:{total: totalHoursFiltered} }}
+        </span>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Skeleton Loader animado al cargar -->
+  <ion-list *ngIf="isLoading">
+    <ion-item *ngFor="let dummy of [1, 2, 3, 4, 5]">
+      <ion-label>
+        <h2>
+          <ion-skeleton-text [animated]="true" style="width: 40%; height: 16px; border-radius: 4px;"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 15%; float: right; height: 16px; border-radius: 12px;"></ion-skeleton-text>
+        </h2>
+        <p>
+          <ion-skeleton-text [animated]="true" style="width: 60%; height: 12px; border-radius: 4px; margin-top: 6px;"></ion-skeleton-text>
+        </p>
+        <p>
+          <ion-skeleton-text [animated]="true" style="width: 80%; height: 12px; border-radius: 4px; margin-top: 4px;"></ion-skeleton-text>
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
   <!-- Lista de Registros Cronológica Descendente -->
-  <ion-list *ngIf="filteredLogs.length > 0">
+  <ion-list *ngIf="!isLoading && filteredLogs.length > 0">
     <ion-item-sliding *ngFor="let log of filteredLogs">
       <ion-item (click)="editLog(log)">
         <ion-label>
@@ -52,7 +140,7 @@
     </ion-item-sliding>
   </ion-list>
 
-  <div *ngIf="filteredLogs.length === 0" class="no-logs">
+  <div *ngIf="!isLoading && filteredLogs.length === 0" class="no-logs">
     <ion-text color="medium">{{ 'WORK_LOGS.NO_LOGS' | translate }}</ion-text>
   </div>
 </ion-content>

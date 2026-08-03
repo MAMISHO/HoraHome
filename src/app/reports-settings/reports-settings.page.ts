@@ -5,6 +5,7 @@ import { DatabaseService } from '../core/services/database.service';
 import { LanguageService, SupportedLanguage } from '../core/services/language.service';
 import { GoogleAuthService } from '../core/services/google-auth.service';
 import { GoogleDriveService } from '../core/services/google-drive.service';
+import { SyncManagerService } from '../core/services/sync-manager.service';
 import { Client } from '../core/entities/client.entity';
 
 @Component({
@@ -29,13 +30,20 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
   serviceSubtotals: { name: string; hours: number }[] = [];
 
   isSyncing = false;
+  syncProgress = 0;
   lastBackupTime: string | null = null;
+  avatarFailed = false;
+
+  onAvatarError(): void {
+    this.avatarFailed = true;
+  }
 
   constructor(
     private dbService: DatabaseService,
     private langService: LanguageService,
     private authService: GoogleAuthService,
     private driveService: GoogleDriveService,
+    private syncManager: SyncManagerService,
     private toastCtrl: ToastController,
     private translate: TranslateService
   ) {
@@ -165,15 +173,21 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
 
   async backupNow(): Promise<void> {
     this.isSyncing = true;
+    this.syncProgress = 0;
     try {
-      await this.driveService.uploadBackup();
+      await this.syncManager.syncAll((progress) => {
+        this.syncProgress = progress;
+      });
       this.lastBackupTime = this.driveService.lastBackupTimestamp();
       this.showToast(this.translate.instant('CLOUD_SYNC.BACKUP_SUCCESS'), 'success');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      this.showToast(this.translate.instant('CLOUD_SYNC.BACKUP_ERROR'), 'danger');
+      const detail = err?.message || err?.error?.error?.message || '';
+      const msg = `${this.translate.instant('CLOUD_SYNC.BACKUP_ERROR')}${detail ? ': ' + detail : ''}`;
+      this.showToast(msg, 'danger');
     } finally {
       this.isSyncing = false;
+      this.syncProgress = 0;
     }
   }
 
@@ -183,9 +197,11 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
       await this.driveService.downloadBackup();
       await this.generateReport();
       this.showToast(this.translate.instant('CLOUD_SYNC.RESTORE_SUCCESS'), 'success');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      this.showToast(this.translate.instant('CLOUD_SYNC.RESTORE_ERROR'), 'danger');
+      const detail = err?.message || err?.error?.error?.message || '';
+      const msg = `${this.translate.instant('CLOUD_SYNC.RESTORE_ERROR')}${detail ? ': ' + detail : ''}`;
+      this.showToast(msg, 'danger');
     } finally {
       this.isSyncing = false;
     }

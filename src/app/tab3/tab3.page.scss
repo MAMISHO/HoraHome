@@ -17,3 +17,85 @@
   text-align: center;
   padding: 48px 0;
 }
+
+/* Estilos de los filtros y totalizadores */
+.period-segment {
+  --background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 2px;
+}
+
+.month-selector-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.month-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ion-color-light);
+  border-radius: 16px;
+  padding: 4px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(var(--ion-color-dark-rgb), 0.08);
+  width: 100%;
+  max-width: 320px;
+}
+
+.month-title-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease-in-out;
+  
+  &:active {
+    background: rgba(var(--ion-color-dark-rgb), 0.05);
+  }
+}
+
+.date-range-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  
+  .date-item {
+    flex: 1;
+    --border-radius: 12px;
+  }
+}
+
+.total-hours-container {
+  margin-top: 12px;
+}
+
+.total-hours-card {
+  margin: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--ion-color-secondary-tint, #e0f2fe), var(--ion-color-light, #f8fafc));
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(var(--ion-color-secondary-rgb, 3, 105, 161), 0.15);
+  
+  .card-content-flex {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 8px;
+  }
+  
+  .time-icon {
+    font-size: 1.3rem;
+    color: var(--ion-color-secondary-shade, #0369a1);
+  }
+  
+  .total-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ion-color-secondary-shade, #0369a1);
+  }
+}

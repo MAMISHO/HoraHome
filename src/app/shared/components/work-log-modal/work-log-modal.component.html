@@ -58,12 +58,12 @@
     <form (ngSubmit)="save()">
       <ion-item fill="outline" class="ion-margin-bottom">
         <ion-label position="stacked">{{ 'CALENDAR.SELECT_DATE' | translate }}</ion-label>
-        <ion-input type="date" [(ngModel)]="workDate" name="workDate" required (ionChange)="loadDateLogs(); checkHoliday();"></ion-input>
+        <ion-input type="date" [(ngModel)]="workDate" name="workDate" required (ionChange)="onDateChange()"></ion-input>
       </ion-item>
 
       <ion-item fill="outline" class="ion-margin-bottom">
         <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
-        <ion-select [(ngModel)]="selectedClientId" name="selectedClientId" required (ionChange)="onClientChange()">
+        <ion-select [(ngModel)]="selectedClientId" name="selectedClientId" [placeholder]="'WORK_LOGS.SELECT_CLIENT_PLACEHOLDER' | translate" required (ionChange)="onClientChange()">
           <ion-select-option *ngFor="let client of activeClients" [value]="client.id">
             {{ client.name }}
           </ion-select-option>
@@ -78,6 +78,27 @@
           </ion-select-option>
         </ion-select>
       </ion-item>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <ion-item fill="outline" style="flex: 1;">
+          <ion-label position="stacked">Hora Inicio</ion-label>
+          <ion-input type="time" [(ngModel)]="startTime" name="startTime" (ionInput)="onTimeChange()"></ion-input>
+        </ion-item>
+        <ion-item fill="outline" style="flex: 1;">
+          <ion-label position="stacked">Hora Fin</ion-label>
+          <ion-input type="time" [(ngModel)]="endTime" name="endTime" (ionInput)="onTimeChange()"></ion-input>
+        </ion-item>
+      </div>
+
+      <!-- Alertas de Validación Visuales -->
+      <div *ngIf="startTime && endTime && endTime <= startTime" class="validation-warning ion-margin-bottom">
+        <ion-icon name="alert-circle-outline" class="warn-icon"></ion-icon>
+        <span class="warn-text">{{ 'WORK_LOGS.WARN_END_TIME_INVALID' | translate }}</span>
+      </div>
+      <div *ngIf="hasOverlap()" class="validation-warning ion-margin-bottom">
+        <ion-icon name="alert-circle-outline" class="warn-icon"></ion-icon>
+        <span class="warn-text">{{ 'WORK_LOGS.WARN_HOURS_OVERLAP' | translate }}</span>
+      </div>
 
       <div class="hours-picker ion-margin-bottom">
         <ion-label class="hours-label">{{ 'REPORTS.TOTAL_HOURS' | translate }}: {{ hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</ion-label>
@@ -97,7 +118,7 @@
         <ion-textarea [(ngModel)]="notes" name="notes" rows="3"></ion-textarea>
       </ion-item>
 
-      <ion-button type="submit" expand="block" [disabled]="!selectedClientId || !selectedServiceId">
+      <ion-button type="submit" expand="block" [disabled]="!isValidForm()">
         {{ 'WORK_LOGS.SAVE' | translate }}
       </ion-button>
     </form>

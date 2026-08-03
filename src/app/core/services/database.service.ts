@@ -36,23 +36,80 @@ export class DatabaseService {
     return this.dataSource.getRepository(BrusselsHoliday);
   }
 
-  async initialize(): Promise<void> {
-    try {
-      const platform = Capacitor.getPlatform();
+  async closeConnection(): Promise<void> {
+    if (this.dataSource && this.dataSource.isInitialized) {
+      await this.dataSource.destroy();
+      console.log('[DatabaseService] Database connection closed.');
+    }
+  }
 
-      if (platform === 'web') {
-        this.strategy = new WebDatabaseStrategy(this.sqlJsLoader);
+  async initialize(): Promise<void> {
+    const platform = Capacitor.getPlatform();
+
+    if (platform === 'web') {
+      this.strategy = new WebDatabaseStrategy(this.sqlJsLoader);
+    } else {
+      this.strategy = new NativeDatabaseStrategy();
+    }
+
+    try {
+      await this.closeConnection();
+      // 1. Intentar inicializar SIN sincronización primero (ideal para verificar el estado de base de datos)
+      this.dataSource = await this.strategy.createDataSource(false);
+      await this.dataSource.initialize();
+
+      // 2. Comprobar si las tablas principales existen
+      const tablesExist = await this.checkIfTablesExist();
+
+      if (!tablesExist) {
+        console.log('[DatabaseService] Database is empty. Re-initializing with synchronize=true to build schema...');
+        await this.closeConnection();
+        // Espera de 100ms para asegurar la liberación del descriptor de archivo
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        this.dataSource = await this.strategy.createDataSource(true);
+        await this.dataSource.initialize();
       } else {
-        this.strategy = new NativeDatabaseStrategy();
+        console.log('[DatabaseService] Database tables exist. Checking schema updates...');
+        // 3. Si ya existen, añadir las nuevas columnas de forma segura sin romper datos
+        await this.runSchemaUpdates();
       }
 
-      this.dataSource = await this.strategy.createDataSource();
-      await this.dataSource.initialize();
       await this.seedServices();
       await this.seedHolidays();
       console.log(`[DatabaseService] Database successfully initialized on platform '${platform}'.`);
     } catch (error) {
-      console.error('[DatabaseService] Initialization error:', error);
+      console.error('[DatabaseService] Critical initialization error:', error);
+    }
+  }
+
+  private async checkIfTablesExist(): Promise<boolean> {
+    try {
+      // Consultar en sqlite_master si la tabla principal 'work_logs' ya existe
+      const result = await this.dataSource.query(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='work_logs'"
+      );
+      return result && result.length > 0;
+    } catch (e) {
+      console.warn('[DatabaseService] Error checking tables existence:', e);
+      return false;
+    }
+  }
+
+  private async runSchemaUpdates(): Promise<void> {
+    try {
+      const tableInfo = await this.dataSource.query("PRAGMA table_info('work_logs')");
+      const columns = Array.isArray(tableInfo) ? tableInfo.map((col: any) => col.name) : [];
+
+      if (!columns.includes('startTime')) {
+        await this.dataSource.query('ALTER TABLE work_logs ADD COLUMN startTime VARCHAR');
+      }
+      if (!columns.includes('endTime')) {
+        await this.dataSource.query('ALTER TABLE work_logs ADD COLUMN endTime VARCHAR');
+      }
+      console.log('[DatabaseService] Schema updates verified/applied (startTime, endTime).');
+    } catch (e) {
+      console.warn('[DatabaseService] Schema updates warning:', e);
     }
   }
 
