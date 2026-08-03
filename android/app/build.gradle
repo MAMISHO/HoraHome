@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.horahome.app"
+    namespace = "es.codebros.horahome"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.horahome.app"
+        applicationId "es.codebros.horahome"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -16,8 +16,39 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            def keyPropsFile = rootProject.file('key.properties')
+            def keyProps = new Properties()
+            if (keyPropsFile.exists()) {
+                keyProps.load(new FileInputStream(keyPropsFile))
+            }
+            
+            // Función auxiliar para expandir ${ENV_VAR:defaultValue} estilo Spring
+            def expandEnv = { String val ->
+                if (!val) return null
+                def matcher = (val =~ /\$\{([^}:]+)(?::([^}]*))?\}/)
+                if (matcher.find()) {
+                    def envVar = matcher.group(1)
+                    def defaultVal = matcher.group(2)
+                    if (defaultVal != null) {
+                        // Limpiar comillas simples o dobles que se hayan escrito en la propiedad
+                        defaultVal = defaultVal.trim().replaceAll(/^['"]|['"]$/, '')
+                    }
+                    return System.getenv(envVar) ?: (defaultVal != null ? defaultVal : val)
+                }
+                return val
+            }
+
+            storeFile = file(System.getenv('ANDROID_KEYSTORE_PATH') ?: expandEnv(keyProps['storeFile']) ?: '../app/upload-keystore.jks')
+            storePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD') ?: expandEnv(keyProps['storePassword'])
+            keyAlias = System.getenv('ANDROID_KEY_ALIAS') ?: expandEnv(keyProps['keyAlias']) ?: 'codebros-upload-key'
+            keyPassword = System.getenv('ANDROID_KEY_PASSWORD') ?: expandEnv(keyProps['keyPassword'])
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -1,0 +1,7 @@
+# Template de ejemplo, para que funcione según la documentación se debe crear una copia de este dichero y renombrarlo a key.properties. Luego configurar las variables de entorno en el sistema.
+
+storePassword=${ANDROID_KEYSTORE_PASSWORD:'contraseñaDefault'}
+keyPassword=${ANDROID_KEY_PASSWORD:'contraseñaDefault'}
+keyAlias=${ANDROID_KEY_ALIAS:'codebros-upload-key'}
+storeFile=${ANDROID_KEYSTORE_PATH:'../app/upload-keystore.jks'}
+

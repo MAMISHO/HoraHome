@@ -1,5 +1,5 @@
 {
-  "appId": "com.horahome.app",
+  "appId": "es.codebros.horahome",
   "appName": "HoraHome",
   "webDir": "www",
   "bundledWebRuntime": false,
