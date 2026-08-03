@@ -40,6 +40,94 @@ for arg in "$@"; do
   esac
 done
 
+# ── 0. Cargar entorno y resolver configuración de Google ────────
+if [ -f "$HOME/.zshrc" ]; then
+  set +e
+  source "$HOME/.zshrc" 2>/dev/null || true
+  set -e
+fi
+
+KEY_PROPS_FILE="$ANDROID_DIR/key.properties"
+
+parse_prop() {
+  local prop_name="$1"
+  local raw_val=""
+  if [ -f "$KEY_PROPS_FILE" ]; then
+    raw_val=$(grep "^${prop_name}=" "$KEY_PROPS_FILE" | cut -d= -f2- | tr -d '\r' || true)
+  fi
+  
+  if [[ "$raw_val" =~ \$\{([^}:]+)(:([^}]*))?\} ]]; then
+    local env_var="${BASH_REMATCH[1]}"
+    local default_val="${BASH_REMATCH[3]}"
+    default_val=$(echo "$default_val" | sed -e "s/^['\"]//" -e "s/['\"]$//")
+    echo "${!env_var:-$default_val}"
+  else
+    echo "$raw_val"
+  fi
+}
+
+PROP_GOOGLE_CLIENT_ID=$(parse_prop "googleWebClientId")
+PROP_GOOGLE_SECRET=$(parse_prop "googleClientSecret")
+
+GOOGLE_CLIENT_ID="${HORAHOME_WEB_APP_CLIENT_ID:-${GOOGLE_WEB_CLIENT_ID:-${PROP_GOOGLE_CLIENT_ID:-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com}}}"
+GOOGLE_CLIENT_SECRET="${HORAHOME_WEB_APP_SECRET_ID:-${PROP_GOOGLE_SECRET:-}}"
+
+# Actualizar src/assets/google-config.json
+mkdir -p "$PROJECT_DIR/src/assets"
+cat << EOF > "$PROJECT_DIR/src/assets/google-config.json"
+{
+  "clientId": "$GOOGLE_CLIENT_ID",
+  "clientSecret": "$GOOGLE_CLIENT_SECRET"
+}
+EOF
+echo "▸ Google config asset sincronizado (Client ID: ${GOOGLE_CLIENT_ID:0:20}…)"
+
+# Generar y actualizar capacitor.config.json
+CAPACITOR_CFG_EXAMPLE="$PROJECT_DIR/capacitor.config.json.example"
+CAPACITOR_CFG="$PROJECT_DIR/capacitor.config.json"
+
+if [ ! -f "$CAPACITOR_CFG" ] && [ -f "$CAPACITOR_CFG_EXAMPLE" ]; then
+  cp "$CAPACITOR_CFG_EXAMPLE" "$CAPACITOR_CFG"
+fi
+
+if [ -f "$CAPACITOR_CFG" ]; then
+  node -e "
+    const fs = require('fs');
+    const path = '$CAPACITOR_CFG';
+    const cfg = JSON.parse(fs.readFileSync(path, 'utf8'));
+    if (!cfg.plugins) cfg.plugins = {};
+    if (!cfg.plugins.GoogleAuth) cfg.plugins.GoogleAuth = {};
+    cfg.plugins.GoogleAuth.serverClientId = '$GOOGLE_CLIENT_ID';
+    fs.writeFileSync(path, JSON.stringify(cfg, null, 2));
+  "
+fi
+
+
+# Generar y actualizar android/app/src/main/res/values/strings.xml con server_client_id
+STRINGS_XML_EXAMPLE="$ANDROID_DIR/strings.xml.example"
+STRINGS_XML="$ANDROID_DIR/app/src/main/res/values/strings.xml"
+
+
+if [ ! -f "$STRINGS_XML" ] && [ -f "$STRINGS_XML_EXAMPLE" ]; then
+  cp "$STRINGS_XML_EXAMPLE" "$STRINGS_XML"
+fi
+
+if [ -f "$STRINGS_XML" ]; then
+  node -e "
+    const fs = require('fs');
+    const path = '$STRINGS_XML';
+    let content = fs.readFileSync(path, 'utf8');
+    if (content.includes('server_client_id')) {
+      content = content.replace(/<string name=\"server_client_id\">.*?<\/string>/, '<string name=\"server_client_id\">$GOOGLE_CLIENT_ID<\/string>');
+    } else {
+      content = content.replace('</resources>', '    <string name=\"server_client_id\">$GOOGLE_CLIENT_ID</string>\n</resources>');
+    }
+    fs.writeFileSync(path, content);
+  "
+fi
+
+
+
 # ── 1. Angular build ────────────────────────
 if [ "$SKIP_WEB" = false ]; then
   echo ""
@@ -57,35 +145,6 @@ fi
 # ── 2. Gradle build ────────────────────────
 echo ""
 if [ "$MODE" = "release" ]; then
-  # Cargar variables del entorno del usuario si no están cargadas
-  if [ -f "$HOME/.zshrc" ]; then
-    set +e
-    source "$HOME/.zshrc" 2>/dev/null || true
-    set -e
-  fi
-
-  # 1. Leer key.properties si existe para extraer variables/fallbacks
-  KEY_PROPS_FILE="$ANDROID_DIR/key.properties"
-  
-  parse_prop() {
-    local prop_name="$1"
-    local raw_val=""
-    if [ -f "$KEY_PROPS_FILE" ]; then
-      raw_val=$(grep "^${prop_name}=" "$KEY_PROPS_FILE" | cut -d= -f2- | tr -d '\r' || true)
-    fi
-    
-    # Si contiene marcador ${ENV_VAR:'default'}
-    if [[ "$raw_val" =~ \$\{([^}:]+)(:([^}]*))?\} ]]; then
-      local env_var="${BASH_REMATCH[1]}"
-      local default_val="${BASH_REMATCH[3]}"
-      # Limpiar comillas del valor por defecto si existen
-      default_val=$(echo "$default_val" | sed -e "s/^['\"]//" -e "s/['\"]$//")
-      echo "${!env_var:-$default_val}"
-    else
-      echo "$raw_val"
-    fi
-  }
-
   PROP_STORE_FILE=$(parse_prop "storeFile")
   PROP_STORE_PASS=$(parse_prop "storePassword")
   PROP_KEY_PASS=$(parse_prop "keyPassword")

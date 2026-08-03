@@ -5,3 +5,9 @@ keyPassword=${ANDROID_KEY_PASSWORD:'contraseñaDefault'}
 keyAlias=${ANDROID_KEY_ALIAS:'codebros-upload-key'}
 storeFile=${ANDROID_KEYSTORE_PATH:'../app/upload-keystore.jks'}
 
+# Google OAuth y Drive Backup Config
+googleWebClientId=${HORAHOME_WEB_APP_CLIENT_ID:'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com'}
+googleClientSecret=${HORAHOME_WEB_APP_SECRET_ID:''}
+googleAndroidClientId=${HORAHOME_ANDROID_CLIENT_ID:''}
+googleAndroidDebugClientId=${HORAHOME_ANDEBUG_CLIENT_ID:''}
+

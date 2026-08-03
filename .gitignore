@@ -75,3 +75,9 @@ Thumbs.db
 key.properties
 android/key.properties
 
+# Generated runtime credentials & configs
+android/app/src/main/res/values/strings.xml
+src/assets/google-config.json
+capacitor.config.json
+
+

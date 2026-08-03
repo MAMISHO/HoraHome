@@ -14,7 +14,7 @@ Antes de compilar o empaquetar la aplicación para producción, asegúrate de co
    - Android SDK con `cmdline-tools` y `platform-tools` configurados.
    - Herramienta `keytool` disponible en el `PATH` (incluida en el JDK).
 3. **Variables de Entorno para Firma (Producción)**:
-   Puedes configurar las siguientes 4 variables en tu archivo de shell (`~/.zshrc` o `~/.bashrc`), o bien mediante `android/key.properties`:
+   Puedes configurar las siguientes variables en tu archivo de shell (`~/.zshrc` o `~/.bashrc`), o bien mediante `android/key.properties`:
    ```bash
    export ANDROID_KEYSTORE_PASSWORD="tu_contraseña_de_keystore"
    export ANDROID_KEY_PASSWORD="tu_contraseña_de_clave"
@@ -23,6 +23,22 @@ Antes de compilar o empaquetar la aplicación para producción, asegúrate de co
    ```
 
 ---
+
+## 🛠️ Inicialización del Entorno de Desarrollo (`setup-env.sh`)
+
+Al clonar el proyecto o antes de abrir la solución en **Android Studio / VSCode**, ejecuta el comando de preparación de entorno:
+
+```bash
+npm run setup
+# O directamente:
+./setup-env.sh
+```
+
+**¿Qué hace este comando?**
+1. Genera los archivos de trabajo requeridos por los IDEs y Capacitor (`capacitor.config.json`, `android/app/src/main/res/values/strings.xml`, `android/key.properties`, `src/assets/google-config.json`) copiándolos desde sus plantillas `.example`.
+2. Inyecta tus variables de entorno locales si ya las tienes definidas.
+3. Garantiza que la carpeta de Android pueda compilarse sin errores en Android Studio sin ensuciar Git con credenciales reales.
+
 
 ## 🔐 Gestión de Keystore en Equipo (Google Play App Signing)
 
@@ -79,6 +95,68 @@ storePassword=${ANDROID_KEYSTORE_PASSWORD:'contraseñaDefault'}
 keyPassword=${ANDROID_KEY_PASSWORD:'contraseñaDefault'}
 keyAlias=codebros-upload-key
 storeFile=../app/upload-keystore.jks
+
+# Google OAuth & Drive Backup Config
+googleWebClientId=${HORAHOME_WEB_APP_CLIENT_ID:'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com'}
+googleClientSecret=${HORAHOME_WEB_APP_SECRET_ID:''}
+googleAndroidClientId=${HORAHOME_ANDROID_CLIENT_ID:''}
+googleAndroidDebugClientId=${HORAHOME_ANDEBUG_CLIENT_ID:''}
 ```
 
-*Nota: Este archivo está incluido en `.gitignore` para proteger tus credenciales.*
+---
+
+## 🔑 Configuración de Google OAuth y Google Drive Backup
+
+Para habilitar el inicio de sesión con Google y las copias de seguridad en Google Drive:
+
+1. **Google Cloud Console**:
+   - Crea un proyecto en [Google Cloud Console](https://console.cloud.google.com/).
+   - En **Pantalla de consentimiento de OAuth**, selecciona scopes `profile`, `email`, y `https://www.googleapis.com/auth/drive.appdata`.
+   - Crea un **ID de Cliente Web (Web Client ID)**.
+   - Crea dos **ID de Cliente de Android** (uno para Release y uno para Debug), introduciendo:
+     - Nombre de paquete: `es.codebros.horahome`
+     - Huella digital SHA-1 de Release: Obtenida del Keystore oficial (`codebros-upload-key`).
+     - Huella digital SHA-1 de Debug: Obtenida de `~/.android/debug.keystore`.
+2. **Configuración de Variables**:
+   Puedes definir los Client IDs en tus variables de entorno (`~/.zshrc`):
+   ```bash
+   export HORAHOME_WEB_APP_CLIENT_ID="123456789-abc.apps.googleusercontent.com"
+   export HORAHOME_WEB_APP_SECRET_ID="GOCSPX-..."
+   export HORAHOME_ANDROID_CLIENT_ID="123456789-release.apps.googleusercontent.com"
+   export HORAHOME_ANDEBUG_CLIENT_ID="123456789-debug.apps.googleusercontent.com"
+   ```
+   O configurar `googleWebClientId` dentro de `android/key.properties`.
+
+---
+
+## 🏗️ Arquitectura de Plantillas y Seguridad (Git Clean Workflow)
+
+Para evitar que credenciales, firmas y tokens privados se suban por accidente a Git, el proyecto implementa un patrón estricto de **Plantillas (`*.example`) autogeneradas**:
+
+| Archivo en Git (Plantilla) | Archivo Generado en Runtime (Ignorado en `.gitignore`) | Función |
+|---|---|---|
+| `android/key.properties.example` | `android/key.properties` | Configuración de firma Keystore y credenciales OAuth |
+| `android/strings.xml.example` | `android/app/src/main/res/values/strings.xml` | Recurso nativo Android para Capacitor GoogleAuth (`server_client_id`) |
+| `capacitor.config.json.example` | `capacitor.config.json` | Configuración principal de Capacitor para Android |
+| *(N/A - Generado al volar)* | `src/assets/google-config.json` | Configuración consumida por el frontend de Angular |
+
+### Flujo de Trabajo para el Equipo de Desarrollo:
+
+1. **Preparación del Entorno (IDE Setup)**:
+   Al clonar el repositorio o preparar el entorno de trabajo, ejecuta:
+   ```bash
+   npm run setup
+   # O directamente:
+   ./setup-env.sh
+   ```
+   *Este script es 100% multiplataforma y desacoplado: simplemente se encarga de crear los archivos locales de trabajo copiándolos desde sus plantillas `.example` si no existen. Esto evita que Android Studio o VSCode reporten errores por archivos faltantes.*
+
+2. **Compilación y Despliegue (`./deploy.sh`)**:
+   - Cada desarrollador parametriza sus credenciales/variables en sus variables de entorno o en su copia local de `android/key.properties`.
+   - Al ejecutar `./deploy.sh` (o `./deploy.sh --release`), el script inyecta automáticamente las credenciales reales en los archivos generados durante la compilación.
+   - **Los archivos generados con credenciales están incluidos en `.gitignore` y nunca se suben al repositorio.**
+
+
+
+
+

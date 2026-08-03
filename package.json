@@ -5,8 +5,9 @@
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
+    "setup": "./setup-env.sh",
     "copy-wasm": "node -e \"const fs=require('fs'); if(fs.existsSync('node_modules/sql.js/dist/sql-wasm.wasm')) { fs.copyFileSync('node_modules/sql.js/dist/sql-wasm.wasm', 'src/assets/sql-wasm.wasm'); fs.copyFileSync('node_modules/sql.js/dist/sql-wasm.js', 'src/assets/sql-wasm.js'); }\"",
-    "postinstall": "npm run copy-wasm",
+    "postinstall": "npm run copy-wasm && npm run setup",
     "prebuild": "npm run copy-wasm",
     "prestart": "npm run copy-wasm",
     "start": "npx ionic serve --port 8100 --no-open",

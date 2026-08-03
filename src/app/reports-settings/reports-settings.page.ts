@@ -149,7 +149,14 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
   }
 
   async signIn(): Promise<void> {
-    await this.authService.signIn();
+    try {
+      await this.authService.signIn();
+      this.showToast(this.translate.instant('CLOUD_SYNC.SIGNIN_SUCCESS') || 'Sesión iniciada con Google', 'success');
+    } catch (err: any) {
+      console.error('Error signing in:', err);
+      const msg = err?.message || err?.error || 'Error al iniciar sesión con Google';
+      this.showToast(msg, 'danger');
+    }
   }
 
   async signOut(): Promise<void> {
