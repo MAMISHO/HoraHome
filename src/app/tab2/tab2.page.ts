@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { GestureController, ModalController, ViewWillEnter } from '@ionic/angular';
+import { ModalController, ViewWillEnter } from '@ionic/angular';
 import { DatabaseService } from '../core/services/database.service';
 import { LanguageService } from '../core/services/language.service';
 import { WorkLog } from '../core/entities/work-log.entity';
@@ -34,6 +34,8 @@ function formatDateIso(d: Date): string {
 export class Tab2Page implements OnInit, AfterViewInit, ViewWillEnter, OnDestroy {
   @ViewChild('calendarGrid', { read: ElementRef }) calendarGridRef!: ElementRef;
   private dbSub?: Subscription;
+  private touchStartX = 0;
+  private touchStartY = 0;
   currentMonthDate = new Date();
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   calendarDays: CalendarDay[] = [];
@@ -44,7 +46,7 @@ export class Tab2Page implements OnInit, AfterViewInit, ViewWillEnter, OnDestroy
     private dbService: DatabaseService,
     private langService: LanguageService,
     private modalCtrl: ModalController,
-    private gestureCtrl: GestureController
+    private zone: NgZone
   ) {
     if (this.currentMonthDate.getFullYear() < 2025) {
       this.currentMonthDate = new Date(2025, 0, 1);
@@ -72,22 +74,28 @@ export class Tab2Page implements OnInit, AfterViewInit, ViewWillEnter, OnDestroy
 
   private setupSwipeGesture(): void {
     if (!this.calendarGridRef) return;
+    const el = this.calendarGridRef.nativeElement as HTMLElement;
 
-    const gesture = this.gestureCtrl.create({
-      el: this.calendarGridRef.nativeElement,
-      gestureName: 'calendar-swipe',
-      threshold: 30,
-      onEnd: (detail) => {
-        if (Math.abs(detail.deltaX) > 80 && Math.abs(detail.deltaY) < 100) {
-          if (detail.deltaX < 0) {
+    el.addEventListener('touchstart', (e: TouchEvent) => {
+      this.touchStartX = e.touches[0].clientX;
+      this.touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    el.addEventListener('touchend', (e: TouchEvent) => {
+      const deltaX = e.changedTouches[0].clientX - this.touchStartX;
+      const deltaY = e.changedTouches[0].clientY - this.touchStartY;
+
+      // Only trigger if horizontal movement is dominant and significant
+      if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        this.zone.run(() => {
+          if (deltaX < 0) {
             this.changeMonth(1);
           } else {
             this.changeMonth(-1);
           }
-        }
+        });
       }
-    });
-    gesture.enable(true);
+    }, { passive: true });
   }
 
   async ionViewWillEnter(): Promise<void> {
