@@ -44,9 +44,14 @@ android {
             storePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD') ?: expandEnv(keyProps['storePassword'])
             keyAlias = System.getenv('ANDROID_KEY_ALIAS') ?: expandEnv(keyProps['keyAlias']) ?: 'codebros-upload-key'
             keyPassword = System.getenv('ANDROID_KEY_PASSWORD') ?: expandEnv(keyProps['keyPassword'])
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.release
+        }
         release {
             signingConfig signingConfigs.release
             minifyEnabled false
