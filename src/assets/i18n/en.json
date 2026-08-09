@@ -28,6 +28,7 @@
     "SEARCH_PLACEHOLDER": "Search notes…",
     "ALL_CLIENTS": "All clients",
     "NO_LOGS": "No records found",
+    "REGISTER_DAY": "Register entry",
     "DELETE_CONFIRM": "Delete {{hours}} hours from {{client}}?",
     "CANCEL": "Cancel",
     "DELETE": "Delete",

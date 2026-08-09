@@ -53,6 +53,11 @@ export class WorkLogModalComponent implements OnInit {
     return this.langService.getCurrentLanguage();
   }
 
+  get isToday(): boolean {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return this.workDate === todayStr;
+  }
+
   async ngOnInit(): Promise<void> {
     await this.loadClientsAndServices();
 

@@ -85,18 +85,24 @@
 
   <!-- Banner Informativo del Día Seleccionado -->
   <ion-card class="selected-day-card" *ngIf="selectedDay">
-    <ion-card-header>
-      <ion-card-subtitle>{{ selectedDay.dateIso | date:'fullDate':undefined:currentLang }}</ion-card-subtitle>
-      <ion-card-title *ngIf="selectedDay.isHoliday">
-        <span *ngIf="selectedDay.isWorkingDayHoliday">🚫 {{ selectedDay.holidayName }} (Festivo laboral - No se trabaja)</span>
-        <span *ngIf="!selectedDay.isWorkingDayHoliday">🎉 {{ selectedDay.holidayName }}</span>
-      </ion-card-title>
+    <ion-card-header style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px;">
+      <div style="flex: 1;">
+        <ion-card-subtitle>{{ selectedDay.dateIso | date:'fullDate':undefined:currentLang }}</ion-card-subtitle>
+        <ion-card-title *ngIf="selectedDay.isHoliday">
+          <span *ngIf="selectedDay.isWorkingDayHoliday">🚫 {{ selectedDay.holidayName }} (Festivo laboral - No se trabaja)</span>
+          <span *ngIf="!selectedDay.isWorkingDayHoliday">🎉 {{ selectedDay.holidayName }}</span>
+        </ion-card-title>
+      </div>
+      <!-- Botón de acceso rápido para añadir registros adicionales a este día -->
+      <ion-button fill="clear" size="small" (click)="openLogModalForDate(selectedDay.dateIso)" *ngIf="selectedDay.logs.length > 0" [title]="'WORK_LOGS.REGISTER_DAY' | translate">
+        <ion-icon slot="icon-only" name="add-circle-outline" style="font-size: 1.8em;"></ion-icon>
+      </ion-button>
     </ion-card-header>
     <ion-card-content>
       <div *ngIf="selectedDay.logs.length === 0" class="empty-day">
         <p>{{ 'WORK_LOGS.NO_LOGS' | translate }}</p>
         <ion-button size="small" (click)="openLogModalForDate(selectedDay.dateIso)">
-          + {{ 'DASHBOARD.REGISTER_TODAY' | translate }}
+          + {{ (selectedDay.isToday ? 'DASHBOARD.REGISTER_TODAY' : 'WORK_LOGS.REGISTER_DAY') | translate }}
         </ion-button>
       </div>
 
@@ -104,7 +110,13 @@
         <ion-item *ngFor="let log of selectedDay.logs">
           <ion-label>
             <h2>{{ log.client.name }}</h2>
-            <p>{{ ('SERVICES.' + log.service.name) | translate }} • {{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</p>
+            <p>
+              {{ ('SERVICES.' + log.service.name) | translate }} • {{ log.hours }}{{ 'COMMON.HOURS_SHORT' | translate }}
+              <span *ngIf="log.startTime && log.endTime"> ({{ log.startTime }} - {{ log.endTime }})</span>
+            </p>
+            <p *ngIf="log.notes" style="font-size: 0.85em; color: var(--ion-color-medium); margin-top: 4px; font-style: italic;">
+              {{ log.notes | slice:0:50 }}{{ log.notes.length > 50 ? '...' : '' }}
+            </p>
           </ion-label>
         </ion-item>
       </ion-list>

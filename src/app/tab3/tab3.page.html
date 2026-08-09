@@ -73,7 +73,7 @@
   <!-- Filtro por Cliente -->
   <ion-item fill="outline" class="ion-margin-bottom">
     <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
-    <ion-select [(ngModel)]="filterClientId" (ionChange)="filterLogs()">
+    <ion-select interface="popover" [(ngModel)]="filterClientId" (ionChange)="filterLogs()">
       <ion-select-option value="">{{ 'WORK_LOGS.ALL_CLIENTS' | translate }}</ion-select-option>
       <ion-select-option *ngFor="let client of clients" [value]="client.id">
         {{ client.name }}
@@ -121,10 +121,10 @@
             <span class="hours-badge">{{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</span>
           </h2>
           <p>
-            {{ ('SERVICES.' + log.service.name) | translate }} • {{ log.workDate | date:'fullDate' }}
+            {{ ('SERVICES.' + log.service.name) | translate }} • {{ log.workDate | date:'fullDate' }}<span *ngIf="log.startTime && log.endTime"> • {{ log.startTime }} - {{ log.endTime }}</span>
           </p>
-          <p *ngIf="log.notes" class="notes-preview">
-            <em>"{{ log.notes }}"</em>
+          <p *ngIf="log.notes" class="notes-preview" style="font-size: 0.85em; color: var(--ion-color-medium); margin-top: 4px; font-style: italic;">
+            "{{ log.notes | slice:0:50 }}{{ log.notes.length > 50 ? '...' : '' }}"
           </p>
         </ion-label>
       </ion-item>

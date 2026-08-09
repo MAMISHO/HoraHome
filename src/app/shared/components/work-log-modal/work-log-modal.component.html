@@ -14,7 +14,7 @@
         <ion-label>Registros ({{ dateLogs.length }})</ion-label>
       </ion-segment-button>
       <ion-segment-button value="form">
-        <ion-label>{{ isEdit ? ('WORK_LOGS.EDIT' | translate) : ('DASHBOARD.REGISTER_TODAY' | translate) }}</ion-label>
+        <ion-label>{{ isEdit ? ('WORK_LOGS.EDIT' | translate) : ((isToday ? 'DASHBOARD.REGISTER_TODAY' : 'WORK_LOGS.REGISTER_DAY') | translate) }}</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
@@ -33,8 +33,13 @@
         <ion-item>
           <ion-label>
             <h2>{{ log.client.name }}</h2>
-            <p>{{ ('SERVICES.' + log.service.name) | translate }} • <strong>{{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</strong></p>
-            <p *ngIf="log.notes" class="log-notes"><em>{{ log.notes }}</em></p>
+            <p>
+              {{ ('SERVICES.' + log.service.name) | translate }} • <strong>{{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</strong>
+              <span *ngIf="log.startTime && log.endTime"> ({{ log.startTime }} - {{ log.endTime }})</span>
+            </p>
+            <p *ngIf="log.notes" class="log-notes" style="font-size: 0.85em; color: var(--ion-color-medium); margin-top: 4px; font-style: italic;">
+              "{{ log.notes | slice:0:50 }}{{ log.notes.length > 50 ? '...' : '' }}"
+            </p>
           </ion-label>
           <ion-buttons slot="end">
             <ion-button color="primary" (click)="startEditLog(log)" title="Editar">
@@ -49,7 +54,7 @@
     </ion-list>
 
     <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="startNewRegistration()">
-      + {{ 'DASHBOARD.REGISTER_TODAY' | translate }}
+      + {{ (isToday ? 'DASHBOARD.REGISTER_TODAY' : 'WORK_LOGS.REGISTER_DAY') | translate }}
     </ion-button>
   </div>
 

@@ -28,6 +28,7 @@
     "SEARCH_PLACEHOLDER": "Rechercher dans les notes…",
     "ALL_CLIENTS": "Tous les clients",
     "NO_LOGS": "Aucun enregistrement",
+    "REGISTER_DAY": "Enregistrer une entrée",
     "DELETE_CONFIRM": "Supprimer {{hours}} heures de {{client}} ?",
     "CANCEL": "Annuler",
     "DELETE": "Supprimer",
