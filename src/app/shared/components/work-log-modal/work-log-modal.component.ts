@@ -207,6 +207,7 @@ export class WorkLogModalComponent implements OnInit {
     if (this.dbService.isReady()) {
       await this.dbService.workLogRepo.remove(log);
       this.hasSavedChanges = true;
+      await this.dbService.notifyWorkLogsChanged();
       this.syncManager.syncInBackground();
       await this.loadDateLogs();
       if (this.dateLogs.length === 0) {
@@ -300,6 +301,7 @@ export class WorkLogModalComponent implements OnInit {
 
       await this.dbService.workLogRepo.save(log);
       this.hasSavedChanges = true;
+      await this.dbService.notifyWorkLogsChanged();
       this.syncManager.syncInBackground();
 
       await this.loadDateLogs();

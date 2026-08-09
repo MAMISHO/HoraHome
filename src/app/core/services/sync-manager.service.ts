@@ -4,6 +4,9 @@ import { GoogleDriveService } from './google-drive.service';
 import { ExcelExportService } from './excel-export.service';
 import { GoogleAuthService } from './google-auth.service';
 import { WorkLog } from '../entities/work-log.entity';
+import { Client } from '../entities/client.entity';
+import { Service } from '../entities/service.entity';
+import { Preferences } from '@capacitor/preferences';
 
 @Injectable({ providedIn: 'root' })
 export class SyncManagerService {
@@ -20,7 +23,7 @@ export class SyncManagerService {
    * Ejecuta la sincronización en segundo plano (non-blocking).
    * Genera los reportes Excel y realiza el backup de base de datos dual.
    */
-  async syncAll(onProgress?: (progress: number) => void): Promise<void> {
+  async syncAll(onProgress?: (progress: number) => void, isManual = false): Promise<void> {
     if (this.isSyncing) return;
 
     if (onProgress) onProgress(0.05);
@@ -31,11 +34,34 @@ export class SyncManagerService {
       throw new Error('Sincronización cancelada: No se pudo obtener el token de Google. Por favor, cierra sesión e inicia sesión de nuevo para aceptar los nuevos permisos.');
     }
 
+    // EVITAR MACHACAR LA NUBE EN EL PRIMER SYNC DE FONDO
+    // Si es automático y no manual, y el dispositivo nunca completó una copia exitosa en esta instalación,
+    // pero ya hay un archivo en Drive, abortamos para no pisarlo con los datos actuales.
+    if (!isManual) {
+      const { value: lastBackup } = await Preferences.get({ key: 'horahome_last_backup_timestamp' });
+      if (!lastBackup) {
+        const fileMeta = await this.driveService.findFileMetadata(token, 'db_horahome.db', undefined, true);
+        if (fileMeta && fileMeta.id) {
+          console.warn('[SyncManagerService] Sincronización automática de fondo cancelada para evitar sobreescribir el backup de la nube.');
+          this.driveService.checkAndPromptRestore();
+          return;
+        }
+      }
+    }
+
     this.isSyncing = true;
     console.log('[SyncManagerService] Iniciando sincronización en segundo plano…');
     if (onProgress) onProgress(0.1);
 
     try {
+      // 0. Prevenir sobreescritura de backup más reciente en la nube
+      const conflict = await this.driveService.hasConflict(token);
+      if (conflict) {
+        console.warn('[SyncManagerService] Conflicto detectado: la nube es más reciente. Sincronización cancelada.');
+        this.driveService.checkAndPromptRestore();
+        return;
+      }
+
       // 1. Ejecutar copia de seguridad dual de la base de datos SQLite
       if (onProgress) onProgress(0.15);
       await this.driveService.uploadBackup();
@@ -118,6 +144,168 @@ export class SyncManagerService {
   }
 
   /**
+   * Maneja la sincronización inteligente inmediatamente después del inicio de sesión.
+   * Si la app está vacía (instalación limpia), descarga la copia de seguridad sin preguntar.
+   * Si ya tiene registros, corre el chequeo de conflictos habitual.
+   */
+  async handlePostLoginSync(): Promise<void> {
+    const token = await this.authService.getAccessToken();
+    if (!token) return;
+
+    if (!this.dbService.isReady()) return;
+
+    const logsCount = await this.dbService.workLogRepo.count();
+    const clientsCount = await this.dbService.clientRepo.count();
+    const isEmpty = logsCount === 0 && clientsCount === 0;
+
+    if (isEmpty) {
+      // Buscar si existe un respaldo en Drive
+      const fileMeta = await this.driveService.findFileMetadata(token, 'db_horahome.db', undefined, true);
+      const hasBackup = !!(fileMeta && fileMeta.id);
+
+      if (hasBackup) {
+        console.log('[SyncManagerService] Dispositivo limpio detectado. Ejecutando restauración automática…');
+        // Descargar la copia de la nube usando el loader bloqueante
+        await this.driveService.downloadBackup(true);
+        // Recargar la ventana para re-inicializar SQLite
+        window.location.reload();
+        return;
+      }
+    }
+
+    // Si ya hay datos locales, ejecutar verificación de conflictos estándar
+    await this.driveService.checkAndPromptRestore();
+  }
+
+  /**
+   * Fusiona los datos locales en memoria con la base de datos recién descargada/restaurada.
+   * Utiliza UUIDs para evitar colisiones y realiza un fuzzy matching de nombres para clientes.
+   */
+  async mergeLocalData(
+    localData: LocalBackupData,
+    onPromptClientMatch: (localName: string, cloudName: string) => Promise<boolean>
+  ): Promise<MergeResult> {
+    const clientIdMap = new Map<string, string>();
+    const serviceIdMap = new Map<string, string>();
+    
+    let insertedLogsCount = 0;
+    let skippedDuplicatesCount = 0;
+    const conflicts: Array<{ clientName: string; date: string; time: string }> = [];
+
+    // 1. Fusión de Servicios
+    const cloudServices = await this.dbService.serviceRepo.find();
+    for (const ls of localData.services) {
+      const match = cloudServices.find(
+        (cs) => cs.name.trim().toLowerCase() === ls.name.trim().toLowerCase()
+      );
+      if (match) {
+        serviceIdMap.set(ls.id, match.id);
+      } else {
+        const saved = await this.dbService.serviceRepo.save(ls);
+        serviceIdMap.set(ls.id, saved.id);
+        cloudServices.push(saved);
+      }
+    }
+
+    // 2. Fusión de Clientes
+    const cloudClients = await this.dbService.clientRepo.find();
+    for (const lc of localData.clients) {
+      const localNorm = lc.name.trim().toLowerCase();
+      
+      // Buscar candidatos por subcadena (fuzzy matching bidireccional)
+      const candidates = cloudClients.filter((cc) => {
+        const cloudNorm = cc.name.trim().toLowerCase();
+        return cloudNorm.includes(localNorm) || localNorm.includes(cloudNorm);
+      });
+
+      let matchedClientId: string | null = null;
+
+      for (const candidate of candidates) {
+        // Preguntar al usuario de forma interactiva (asíncrona)
+        const isSame = await onPromptClientMatch(lc.name, candidate.name);
+        if (isSame) {
+          matchedClientId = candidate.id;
+          break;
+        }
+      }
+
+      if (matchedClientId) {
+        clientIdMap.set(lc.id, matchedClientId);
+      } else {
+        // Si no se vincula, se guarda como un nuevo registro
+        const saved = await this.dbService.clientRepo.save(lc);
+        clientIdMap.set(lc.id, saved.id);
+        cloudClients.push(saved);
+      }
+    }
+
+    // 3. Fusión de Registros de Horas
+    const cloudLogs = await this.dbService.workLogRepo.find({
+      relations: { client: true, service: true },
+    });
+
+    for (const lw of localData.workLogs) {
+      const mappedClientId = clientIdMap.get(lw.client.id);
+      const mappedServiceId = serviceIdMap.get(lw.service.id);
+
+      if (!mappedClientId || !mappedServiceId) continue;
+
+      const clientObj = await this.dbService.clientRepo.findOneBy({ id: mappedClientId });
+      const serviceObj = await this.dbService.serviceRepo.findOneBy({ id: mappedServiceId });
+
+      if (!clientObj || !serviceObj) continue;
+
+      // Chequear duplicado exacto
+      const isDuplicate = cloudLogs.some(
+        (cl) =>
+          cl.client.id === mappedClientId &&
+          cl.workDate === lw.workDate &&
+          cl.startTime === lw.startTime &&
+          cl.endTime === lw.endTime &&
+          cl.hours === lw.hours
+      );
+
+      if (isDuplicate) {
+        skippedDuplicatesCount++;
+        continue;
+      }
+
+      // Chequear solapamiento de horas en la misma fecha
+      let hasOverlap = false;
+      if (lw.startTime && lw.endTime) {
+        hasOverlap = cloudLogs.some((cl) => {
+          if (cl.client.id !== mappedClientId || cl.workDate !== lw.workDate) return false;
+          if (!cl.startTime || !cl.endTime) return false;
+          
+          return lw.startTime! < cl.endTime && lw.endTime! > cl.startTime;
+        });
+      }
+
+      if (hasOverlap) {
+        conflicts.push({
+          clientName: clientObj.name,
+          date: lw.workDate,
+          time: lw.startTime && lw.endTime ? `${lw.startTime} - ${lw.endTime}` : 'Horario solapado',
+        });
+        continue;
+      }
+
+      // Guardar el registro
+      lw.client = clientObj;
+      lw.service = serviceObj;
+      await this.dbService.workLogRepo.save(lw);
+      cloudLogs.push(lw);
+      insertedLogsCount++;
+    }
+
+    return {
+      insertedLogsCount,
+      skippedDuplicatesCount,
+      conflicts,
+    };
+  }
+
+  /**
    * Agrupa los registros de trabajo por Año, Mes y Cliente.
    */
   private groupLogs(logs: WorkLog[]): any {
@@ -149,4 +337,20 @@ export class SyncManagerService {
 
     return groups;
   }
+}
+
+export interface LocalBackupData {
+  clients: Client[];
+  services: Service[];
+  workLogs: WorkLog[];
+}
+
+export interface MergeResult {
+  insertedLogsCount: number;
+  skippedDuplicatesCount: number;
+  conflicts: Array<{
+    clientName: string;
+    date: string;
+    time: string;
+  }>;
 }

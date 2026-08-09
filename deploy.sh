@@ -210,7 +210,20 @@ if [ "$INSTALL" = true ] && [ "$MODE" = "debug" ]; then
   "$ADB" logcat -c
 
   echo "▸ Launching app…"
-  "$ADB" shell am start -n "$PACKAGE/.MainActivity"
+  LAUNCH_OUT=$("$ADB" shell am start -n "$PACKAGE/.MainActivity" 2>&1)
+  echo "$LAUNCH_OUT"
+
+  if echo "$LAUNCH_OUT" | grep -q "Error type 3"; then
+    echo ""
+    echo "⚠ Conflicto de firmas o instalación corrupta detectada (Error type 3)."
+    echo "▸ Ejecutando desinstalación forzada para limpiar el dispositivo..."
+    "$ADB" uninstall "$PACKAGE"
+    sleep 1
+    echo "▸ Reinstalando la aplicación..."
+    "$ANDROID_DIR/gradlew" -p "$ANDROID_DIR" installDebug
+    echo "▸ Intentando lanzar de nuevo..."
+    "$ADB" shell am start -n "$PACKAGE/.MainActivity"
+  fi
   sleep 6
 
   echo "▸ Checking logs for errors…"

@@ -99,7 +99,8 @@
     "BACKUP_SUCCESS": "Copia realizada con éxito",
     "BACKUP_ERROR": "Error al realizar la copia",
     "RESTORE_SUCCESS": "Datos restaurados con éxito",
-    "RESTORE_ERROR": "Error al restaurar datos"
+    "RESTORE_ERROR": "Error al restaurar datos",
+    "SIGNIN_SUCCESS": "Sesión iniciada con éxito"
   },
   "SERVICES": {
     "Cleaning": "Limpieza",
@@ -113,12 +114,27 @@
     "SAVING": "Guardando…",
     "ERROR": "Error inesperado",
     "OK": "Aceptar",
-    "CLOSE": "Cerrar"
+    "CLOSE": "Cerrar",
+    "NEWER_BACKUP_FOUND": "Copia de seguridad más reciente",
+    "RESTORE_PROMPT_NEWER": "Hay una copia de seguridad en la nube más reciente que la de tu dispositivo.\n\n• En la nube: {{cloudTime}}\n• En tu dispositivo: {{localTime}}\n\n¿Deseas restaurar la copia de la nube? (Los datos actuales de tu dispositivo se fusionarán interactiva y de forma segura)",
+    "BACKUP_FOUND": "Copia de seguridad encontrada",
+    "RESTORE_PROMPT_FIRST": "Se encontró una copia de seguridad en la nube. Puedes restaurarla para recuperar tus datos históricos.\n\n• En la nube: {{cloudTime}}\n• En tu dispositivo: {{localTime}}\n\n¿Deseas restaurar la copia de la nube? (Los datos actuales de tu dispositivo se fusionarán interactiva y de forma segura)",
+    "CANCEL": "Cancelar",
+    "RESTORE": "Restaurar",
+    "RESTORING": "Restaurando copia de seguridad…"
   },
   "LANGUAGE": {
     "TITLE": "Idioma",
     "ES": "Español",
     "EN": "English",
     "FR": "Français"
+  },
+  "MERGE": {
+    "CLIENT_HEADER": "¿Es el mismo cliente?",
+    "CLIENT_BODY": "Hemos encontrado una coincidencia similar:\n\n• En el dispositivo: \"{{localName}}\"\n• En la nube: \"{{cloudName}}\"\n\n¿Se trata del mismo cliente? Si confirmas, sus registros se fusionarán.",
+    "YES_SAME": "Sí, es el mismo",
+    "NO_DIFFERENT": "No, es diferente",
+    "CONFLICTS_HEADER": "Registros omitidos",
+    "CONFLICTS_BODY": "Se restauró la copia de seguridad, pero se omitieron {{count}} registros locales debido a solapamiento de horarios (ya resguardados en Drive/Conflict_Backups)."
   }
 }

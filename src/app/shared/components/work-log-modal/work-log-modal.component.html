@@ -63,7 +63,7 @@
 
       <ion-item fill="outline" class="ion-margin-bottom">
         <ion-label position="stacked">{{ 'CLIENTS.TITLE' | translate }}</ion-label>
-        <ion-select [(ngModel)]="selectedClientId" name="selectedClientId" [placeholder]="'WORK_LOGS.SELECT_CLIENT_PLACEHOLDER' | translate" required (ionChange)="onClientChange()">
+        <ion-select interface="popover" [(ngModel)]="selectedClientId" name="selectedClientId" [placeholder]="'WORK_LOGS.SELECT_CLIENT_PLACEHOLDER' | translate" required (ionChange)="onClientChange()">
           <ion-select-option *ngFor="let client of activeClients" [value]="client.id">
             {{ client.name }}
           </ion-select-option>
@@ -72,7 +72,7 @@
 
       <ion-item fill="outline" class="ion-margin-bottom">
         <ion-label position="stacked">{{ 'DASHBOARD.SERVICES_BREAKDOWN' | translate }}</ion-label>
-        <ion-select [(ngModel)]="selectedServiceId" name="selectedServiceId" required>
+        <ion-select interface="popover" [(ngModel)]="selectedServiceId" name="selectedServiceId" required>
           <ion-select-option *ngFor="let service of services" [value]="service.id">
             {{ ('SERVICES.' + service.name) | translate }}
           </ion-select-option>

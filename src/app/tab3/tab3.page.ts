@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AlertController, ToastController, ModalController, ActionSheetController, ViewWillEnter } from '@ionic/angular';
 import { Share } from '@capacitor/share';
 import { TranslateService } from '@ngx-translate/core';
@@ -14,7 +15,8 @@ import { WorkLogModalComponent } from '../shared/components/work-log-modal/work-
   styleUrls: ['tab3.page.scss'],
   standalone: false,
 })
-export class Tab3Page implements OnInit, ViewWillEnter {
+export class Tab3Page implements OnInit, ViewWillEnter, OnDestroy {
+  private dbSub?: Subscription;
   allLogs: WorkLog[] = [];
   filteredLogs: WorkLog[] = [];
   clients: Client[] = [];
@@ -93,6 +95,13 @@ export class Tab3Page implements OnInit, ViewWillEnter {
 
   async ngOnInit(): Promise<void> {
     await this.loadLogs();
+    this.dbSub = this.dbService.workLogsChanged$.subscribe(() => {
+      this.loadLogs();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dbSub?.unsubscribe();
   }
 
   async ionViewWillEnter(): Promise<void> {
@@ -165,8 +174,6 @@ export class Tab3Page implements OnInit, ViewWillEnter {
     const modal = await this.modalCtrl.create({
       component: WorkLogModalComponent,
       componentProps: { workLog: log },
-      breakpoints: [0, 0.75, 1.0],
-      initialBreakpoint: 0.75,
     });
 
     await modal.present();
@@ -244,6 +251,7 @@ export class Tab3Page implements OnInit, ViewWillEnter {
   private async commitPhysicalDelete(log: WorkLog): Promise<void> {
     if (this.dbService.isReady()) {
       await this.dbService.workLogRepo.remove(log);
+      await this.dbService.notifyWorkLogsChanged();
     }
   }
 

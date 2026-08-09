@@ -1,6 +1,6 @@
 import { NgModule, APP_INITIALIZER, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouteReuseStrategy } from '@angular/router';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
@@ -19,6 +19,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DatabaseService } from './core/services/database.service';
 import { LanguageService } from './core/services/language.service';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 // Registrar datos de localización para los pipes de fecha/moneda en español y francés
 registerLocaleData(localeEs, 'es');
@@ -56,6 +57,11 @@ export function initializeApp(
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [DatabaseService, LanguageService],
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
       multi: true,
     },
   ],

@@ -160,6 +160,9 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
     try {
       await this.authService.signIn();
       this.showToast(this.translate.instant('CLOUD_SYNC.SIGNIN_SUCCESS') || 'Sesión iniciada con Google', 'success');
+      
+      // Sincronización post-login inteligente
+      await this.syncManager.handlePostLoginSync();
     } catch (err: any) {
       console.error('Error signing in:', err);
       const msg = err?.message || err?.error || 'Error al iniciar sesión con Google';
@@ -177,7 +180,7 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
     try {
       await this.syncManager.syncAll((progress) => {
         this.syncProgress = progress;
-      });
+      }, true);
       this.lastBackupTime = this.driveService.lastBackupTimestamp();
       this.showToast(this.translate.instant('CLOUD_SYNC.BACKUP_SUCCESS'), 'success');
     } catch (err: any) {

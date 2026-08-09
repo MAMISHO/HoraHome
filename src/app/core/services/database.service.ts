@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { DataSource, Repository } from 'typeorm';
 import { Capacitor } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
+import { Subject } from 'rxjs';
 import { SQLJS_LOADER_TOKEN, SqlJsInitFunction } from '../tokens/database.tokens';
 import { Client } from '../entities/client.entity';
 import { Service } from '../entities/service.entity';
@@ -16,9 +18,20 @@ export class DatabaseService {
   private dataSource!: DataSource;
   private strategy!: IDatabaseStrategy;
 
+  private _workLogsChanged = new Subject<void>();
+  public readonly workLogsChanged$ = this._workLogsChanged.asObservable();
+
   constructor(
     @Inject(SQLJS_LOADER_TOKEN) private sqlJsLoader: () => Promise<SqlJsInitFunction>
   ) {}
+
+  async notifyWorkLogsChanged(): Promise<void> {
+    this._workLogsChanged.next();
+    await Preferences.set({
+      key: 'local_db_last_update',
+      value: new Date().toISOString()
+    });
+  }
 
   get clientRepo(): Repository<Client> {
     return this.dataSource.getRepository(Client);

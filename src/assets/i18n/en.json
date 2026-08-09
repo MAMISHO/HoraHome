@@ -99,7 +99,8 @@
     "BACKUP_SUCCESS": "Backup successful",
     "BACKUP_ERROR": "Backup failed",
     "RESTORE_SUCCESS": "Data restored successfully",
-    "RESTORE_ERROR": "Restore failed"
+    "RESTORE_ERROR": "Restore failed",
+    "SIGNIN_SUCCESS": "Signed in successfully"
   },
   "SERVICES": {
     "Cleaning": "Cleaning",
@@ -113,12 +114,27 @@
     "SAVING": "Saving…",
     "ERROR": "Unexpected error",
     "OK": "OK",
-    "CLOSE": "Close"
+    "CLOSE": "Close",
+    "NEWER_BACKUP_FOUND": "Newer Backup Found",
+    "RESTORE_PROMPT_NEWER": "A newer backup was found in the cloud compared to your device.\n\n• Cloud backup: {{cloudTime}}\n• Device data: {{localTime}}\n\nDo you want to restore the cloud backup? (Your current device data will be merged interactively and securely)",
+    "BACKUP_FOUND": "Backup Found",
+    "RESTORE_PROMPT_FIRST": "A backup was found in the cloud. You can restore it to recover your historical data.\n\n• Cloud backup: {{cloudTime}}\n• Device data: {{localTime}}\n\nDo you want to restore the cloud backup? (Your current device data will be merged interactively and securely)",
+    "CANCEL": "Cancel",
+    "RESTORE": "Restore",
+    "RESTORING": "Restoring backup…"
   },
   "LANGUAGE": {
     "TITLE": "Language",
     "ES": "Español",
     "EN": "English",
     "FR": "Français"
+  },
+  "MERGE": {
+    "CLIENT_HEADER": "Is this the same client?",
+    "CLIENT_BODY": "We found a similar match:\n\n• On device: \"{{localName}}\"\n• In cloud: \"{{cloudName}}\"\n\nIs this the same client? If you confirm, their work logs will be merged.",
+    "YES_SAME": "Yes, it is the same",
+    "NO_DIFFERENT": "No, it's different",
+    "CONFLICTS_HEADER": "Skipped Records",
+    "CONFLICTS_BODY": "Backup restored, but {{count}} local records were skipped due to overlapping hours (already backed up in Drive/Conflict_Backups)."
   }
 }

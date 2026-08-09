@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ModalController, ViewWillEnter } from '@ionic/angular';
 import { DatabaseService } from '../core/services/database.service';
 import { LanguageService } from '../core/services/language.service';
@@ -30,7 +31,8 @@ function formatDateIso(d: Date): string {
   styleUrls: ['tab2.page.scss'],
   standalone: false,
 })
-export class Tab2Page implements OnInit, ViewWillEnter {
+export class Tab2Page implements OnInit, ViewWillEnter, OnDestroy {
+  private dbSub?: Subscription;
   currentMonthDate = new Date();
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   calendarDays: CalendarDay[] = [];
@@ -53,6 +55,13 @@ export class Tab2Page implements OnInit, ViewWillEnter {
 
   async ngOnInit(): Promise<void> {
     await this.generateCalendar();
+    this.dbSub = this.dbService.workLogsChanged$.subscribe(() => {
+      this.generateCalendar();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dbSub?.unsubscribe();
   }
 
   async ionViewWillEnter(): Promise<void> {
@@ -199,8 +208,6 @@ export class Tab2Page implements OnInit, ViewWillEnter {
     const modal = await this.modalCtrl.create({
       component: WorkLogModalComponent,
       componentProps: { initialDate: dateIso },
-      breakpoints: [0, 0.75, 1.0],
-      initialBreakpoint: 0.75,
     });
 
     await modal.present();

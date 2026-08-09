@@ -99,7 +99,8 @@
     "BACKUP_SUCCESS": "Sauvegarde réussie",
     "BACKUP_ERROR": "Échec de la sauvegarde",
     "RESTORE_SUCCESS": "Données restaurées avec succès",
-    "RESTORE_ERROR": "Échec de la restauration"
+    "RESTORE_ERROR": "Échec de la restauration",
+    "SIGNIN_SUCCESS": "Connexion réussie"
   },
   "SERVICES": {
     "Cleaning": "Nettoyage",
@@ -113,12 +114,27 @@
     "SAVING": "Enregistrement…",
     "ERROR": "Erreur inattendue",
     "OK": "OK",
-    "CLOSE": "Fermer"
+    "CLOSE": "Fermer",
+    "NEWER_BACKUP_FOUND": "Sauvegarde plus récente trouvée",
+    "RESTORE_PROMPT_NEWER": "Une sauvegarde plus récente a été trouvée dans le cloud par rapport à votre appareil.\n\n• Sauvegarde cloud: {{cloudTime}}\n• Données de l'appareil: {{localTime}}\n\nFaut-il restaurer la sauvegarde cloud ? (Les données actuelles de votre appareil seront fusionnées de manière interactive et sécurisée)",
+    "BACKUP_FOUND": "Sauvegarde trouvée",
+    "RESTORE_PROMPT_FIRST": "Une sauvegarde a été trouvée dans le cloud. Vous pouvez la restaurer pour récupérer vos données historiques.\n\n• Sauvegarde cloud: {{cloudTime}}\n• Données de l'appareil: {{localTime}}\n\nFaut-il restaurer la sauvegarde cloud ? (Les données actuelles de votre appareil seront fusionnées de manière interactive et sécurisée)",
+    "CANCEL": "Annuler",
+    "RESTORE": "Restaurer",
+    "RESTORING": "Restauration de la sauvegarde…"
   },
   "LANGUAGE": {
     "TITLE": "Langue",
     "ES": "Español",
     "EN": "English",
     "FR": "Français"
+  },
+  "MERGE": {
+    "CLIENT_HEADER": "Est-ce le même client ?",
+    "CLIENT_BODY": "Nous avons trouvé une correspondance similaire :\n\n• Sur l'appareil : \"{{localName}}\"\n• Dans le cloud : \"{{cloudName}}\"\n\nS'agit-il du même client ? Si vous confirmez, ses enregistrements seront fusionnés.",
+    "YES_SAME": "Oui, c'est le même",
+    "NO_DIFFERENT": "Non, c'est différent",
+    "CONFLICTS_HEADER": "Enregistrements ignorés",
+    "CONFLICTS_BODY": "Sauvegarde restaurée, mais {{count}} enregistrements locaux ont été ignorés en raison de chevauchements d'horaires (déjà sauvegardés dans Drive/Conflict_Backups)."
   }
 }
