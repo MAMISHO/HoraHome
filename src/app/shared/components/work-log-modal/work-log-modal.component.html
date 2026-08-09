@@ -119,6 +119,15 @@
       </div>
 
       <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'WORK_LOGS.PAYMENT_STATUS_FILTER' | translate }}</ion-label>
+        <ion-select interface="popover" [(ngModel)]="paymentType" name="paymentType" (ionChange)="isPaid = !!paymentType">
+          <ion-select-option [value]="undefined">{{ 'WORK_LOGS.UNPAID' | translate }}</ion-select-option>
+          <ion-select-option value="cash">💵 {{ 'WORK_LOGS.PAID' | translate }} ({{ 'WORK_LOGS.CASH' | translate }})</ion-select-option>
+          <ion-select-option value="check">🧾 {{ 'WORK_LOGS.PAID' | translate }} ({{ 'WORK_LOGS.CHECK' | translate }})</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item fill="outline" class="ion-margin-bottom">
         <ion-label position="stacked">{{ 'WORK_LOGS.SEARCH_PLACEHOLDER' | translate }}</ion-label>
         <ion-textarea [(ngModel)]="notes" name="notes" rows="3"></ion-textarea>
       </ion-item>

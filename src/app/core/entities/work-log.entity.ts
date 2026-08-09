@@ -47,6 +47,12 @@ export class WorkLog {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
+  @Column({ type: 'boolean', default: false })
+  isPaid!: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  paymentType?: 'cash' | 'check';
+
   @CreateDateColumn()
   createdAt!: Date;
 }

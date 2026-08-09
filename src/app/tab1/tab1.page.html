@@ -50,6 +50,31 @@
     </ion-card>
   </div>
 
+  <!-- Payment Breakdown -->
+  <ion-card class="kpi-card" *ngIf="monthlyHours > 0">
+    <ion-card-header>
+      <ion-card-subtitle>{{ 'WORK_LOGS.PAYMENT_STATUS_FILTER' | translate }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span style="color: var(--ion-color-warning);">⏳ {{ 'REPORTS.UNPAID_HOURS' | translate }}</span>
+        <strong>{{ unpaidHours }} h — {{ unpaidEarnings }} €</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span style="color: var(--ion-color-success);">✅ {{ 'REPORTS.PAID_HOURS' | translate }}</span>
+        <strong>{{ paidHours }} h — {{ paidEarnings }} €</strong>
+      </div>
+      <div *ngIf="cashHours > 0" style="display: flex; justify-content: space-between; padding-left: 16px; font-size: 0.9em; color: var(--ion-color-medium);">
+        <span>💵 {{ 'REPORTS.CASH_PAID' | translate }}</span>
+        <span>{{ cashHours }} h</span>
+      </div>
+      <div *ngIf="checkHours > 0" style="display: flex; justify-content: space-between; padding-left: 16px; font-size: 0.9em; color: var(--ion-color-medium);">
+        <span>🧾 {{ 'REPORTS.CHECK_PAID' | translate }}</span>
+        <span>{{ checkHours }} h</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
   <!-- 3. Gráfico Resumen por Servicio -->
   <ion-card class="chart-card">
     <ion-card-header>

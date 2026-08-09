@@ -23,10 +23,21 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
   customEndDate = new Date().toISOString().split('T')[0];
 
   filterClientId = '';
+  filterPaymentStatus: 'all' | 'unpaid' | 'paid' | 'cash' | 'check' = 'all';
   clients: Client[] = [];
 
   totalHours = 0;
   estimatedEarnings = 0;
+
+  unpaidHours = 0;
+  unpaidEarnings = 0;
+  paidHours = 0;
+  paidEarnings = 0;
+  cashHours = 0;
+  cashEarnings = 0;
+  checkHours = 0;
+  checkEarnings = 0;
+
   serviceSubtotals: { name: string; hours: number }[] = [];
 
   isSyncing = false;
@@ -87,6 +98,16 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
       query = query.andWhere('client.id = :clientId', { clientId: this.filterClientId });
     }
 
+    if (this.filterPaymentStatus === 'paid') {
+      query = query.andWhere('log.isPaid = true');
+    } else if (this.filterPaymentStatus === 'unpaid') {
+      query = query.andWhere('(log.isPaid IS NULL OR log.isPaid = false)');
+    } else if (this.filterPaymentStatus === 'cash') {
+      query = query.andWhere('log.isPaid = true AND log.paymentType = :pType', { pType: 'cash' });
+    } else if (this.filterPaymentStatus === 'check') {
+      query = query.andWhere('log.isPaid = true AND log.paymentType = :pType', { pType: 'check' });
+    }
+
     const logs = await query.getMany();
 
     this.totalHours = Math.round(logs.reduce((sum, l) => sum + Number(l.hours), 0) * 10) / 10;
@@ -97,6 +118,31 @@ export class ReportsSettingsPage implements OnInit, ViewWillEnter {
       return sum + Number(l.hours) * rate;
     }, 0);
     this.estimatedEarnings = Math.round(earnings * 100) / 100;
+
+    // Detailed payment breakdown
+    const unpaidLogs = logs.filter((l) => !l.isPaid);
+    this.unpaidHours = Math.round(unpaidLogs.reduce((sum, l) => sum + Number(l.hours), 0) * 10) / 10;
+    this.unpaidEarnings = Math.round(
+      unpaidLogs.reduce((sum, l) => sum + Number(l.hours) * (Number(l.client.hourlyRate) || 0), 0) * 100
+    ) / 100;
+
+    const paidLogs = logs.filter((l) => l.isPaid);
+    this.paidHours = Math.round(paidLogs.reduce((sum, l) => sum + Number(l.hours), 0) * 10) / 10;
+    this.paidEarnings = Math.round(
+      paidLogs.reduce((sum, l) => sum + Number(l.hours) * (Number(l.client.hourlyRate) || 0), 0) * 100
+    ) / 100;
+
+    const cashLogs = logs.filter((l) => l.isPaid && l.paymentType === 'cash');
+    this.cashHours = Math.round(cashLogs.reduce((sum, l) => sum + Number(l.hours), 0) * 10) / 10;
+    this.cashEarnings = Math.round(
+      cashLogs.reduce((sum, l) => sum + Number(l.hours) * (Number(l.client.hourlyRate) || 0), 0) * 100
+    ) / 100;
+
+    const checkLogs = logs.filter((l) => l.isPaid && l.paymentType === 'check');
+    this.checkHours = Math.round(checkLogs.reduce((sum, l) => sum + Number(l.hours), 0) * 10) / 10;
+    this.checkEarnings = Math.round(
+      checkLogs.reduce((sum, l) => sum + Number(l.hours) * (Number(l.client.hourlyRate) || 0), 0) * 100
+    ) / 100;
 
     // Subtotals per service
     const subMap = new Map<string, number>();

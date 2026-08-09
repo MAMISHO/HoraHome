@@ -16,6 +16,13 @@ export class Tab1Page implements OnInit, ViewWillEnter {
   monthlyHours = 0;
   monthDiff = 0;
 
+  unpaidHours = 0;
+  unpaidEarnings = 0;
+  paidHours = 0;
+  paidEarnings = 0;
+  cashHours = 0;
+  checkHours = 0;
+
   topClientName = '';
   topClientHours = 0;
 
@@ -75,6 +82,18 @@ export class Tab1Page implements OnInit, ViewWillEnter {
       .getMany();
 
     this.monthlyHours = currentLogs.reduce((sum, log) => sum + Number(log.hours), 0);
+
+    // Payment breakdown
+    const unpaid = currentLogs.filter(l => !l.isPaid);
+    this.unpaidHours = Math.round(unpaid.reduce((s, l) => s + Number(l.hours), 0) * 10) / 10;
+    this.unpaidEarnings = Math.round(unpaid.reduce((s, l) => s + Number(l.hours) * (Number(l.client.hourlyRate) || 0), 0) * 100) / 100;
+
+    const paid = currentLogs.filter(l => l.isPaid);
+    this.paidHours = Math.round(paid.reduce((s, l) => s + Number(l.hours), 0) * 10) / 10;
+    this.paidEarnings = Math.round(paid.reduce((s, l) => s + Number(l.hours) * (Number(l.client.hourlyRate) || 0), 0) * 100) / 100;
+
+    this.cashHours = Math.round(paid.filter(l => l.paymentType === 'cash').reduce((s, l) => s + Number(l.hours), 0) * 10) / 10;
+    this.checkHours = Math.round(paid.filter(l => l.paymentType === 'check').reduce((s, l) => s + Number(l.hours), 0) * 10) / 10;
 
     // 2. Last Month Work Logs
     const lastLogs = await this.dbService.workLogRepo

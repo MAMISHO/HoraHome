@@ -23,6 +23,7 @@ export class Tab3Page implements OnInit, ViewWillEnter, OnDestroy {
 
   searchQuery = '';
   filterClientId = '';
+  filterPaymentStatus: 'all' | 'paid' | 'unpaid' | 'cash' | 'check' = 'all';
 
   // Filtros de Fecha
   filterPeriodType: 'month' | 'custom' | 'all' = 'month';
@@ -34,6 +35,9 @@ export class Tab3Page implements OnInit, ViewWillEnter, OnDestroy {
 
   private undoTimer: any = null;
   private pendingDeleteLog: WorkLog | null = null;
+
+  selectionMode = false;
+  selectedLogs = new Set<string>();
 
   constructor(
     private dbService: DatabaseService,
@@ -154,6 +158,16 @@ export class Tab3Page implements OnInit, ViewWillEnter, OnDestroy {
       );
     }
 
+    if (this.filterPaymentStatus === 'paid') {
+      result = result.filter(l => l.isPaid);
+    } else if (this.filterPaymentStatus === 'unpaid') {
+      result = result.filter(l => !l.isPaid);
+    } else if (this.filterPaymentStatus === 'cash') {
+      result = result.filter(l => l.isPaid && l.paymentType === 'cash');
+    } else if (this.filterPaymentStatus === 'check') {
+      result = result.filter(l => l.isPaid && l.paymentType === 'check');
+    }
+
     // Filtro por Fecha
     if (this.filterPeriodType === 'month') {
       const range = this.getMonthRange(this.selectedMonthDate);
@@ -181,6 +195,108 @@ export class Tab3Page implements OnInit, ViewWillEnter, OnDestroy {
     if (data?.saved) {
       await this.loadLogs();
     }
+  }
+
+  toggleSelectionMode() {
+    if (!this.selectionMode) {
+      this.selectionMode = true;
+      this.selectedLogs.clear();
+    } else {
+      this.selectionMode = false;
+      this.selectedLogs.clear();
+    }
+  }
+
+  toggleSelection(log: WorkLog) {
+    if (this.selectedLogs.has(log.id)) {
+      this.selectedLogs.delete(log.id);
+      if (this.selectedLogs.size === 0) {
+        this.selectionMode = false;
+      }
+    } else {
+      this.selectedLogs.add(log.id);
+    }
+  }
+
+  handleItemClick(log: WorkLog) {
+    if (this.selectionMode) {
+      this.toggleSelection(log);
+    } else {
+      this.editLog(log);
+    }
+  }
+
+  async markSelectedAsPaid(paymentType: 'cash' | 'check') {
+    if (this.selectedLogs.size === 0) return;
+
+    const rawType = paymentType === 'cash'
+      ? this.translate.instant('WORK_LOGS.CASH')
+      : this.translate.instant('WORK_LOGS.CHECK');
+    const typeLabel = paymentType === 'cash' ? `${rawType} 💵` : `${rawType} 🧾`;
+    const count = this.selectedLogs.size;
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('WORK_LOGS.MARK_PAID_CONFIRM_TITLE'),
+      message: this.translate.instant('WORK_LOGS.MARK_PAID_CONFIRM_MSG', { count, type: typeLabel }),
+      buttons: [
+        {
+          text: this.translate.instant('WORK_LOGS.CANCEL'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('WORK_LOGS.CONFIRM'),
+          handler: async () => {
+            for (const logId of this.selectedLogs) {
+              const log = this.allLogs.find(l => l.id === logId);
+              if (log) {
+                log.isPaid = true;
+                log.paymentType = paymentType;
+                await this.dbService.workLogRepo.save(log);
+              }
+            }
+
+            this.selectionMode = false;
+            this.selectedLogs.clear();
+            await this.dbService.notifyWorkLogsChanged();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async unmarkSelectedAsPaid() {
+    if (this.selectedLogs.size === 0) return;
+
+    const alert = await this.alertCtrl.create({
+      header: this.translate.instant('WORK_LOGS.UNMARK_PAID_CONFIRM_TITLE'),
+      message: this.translate.instant('WORK_LOGS.UNMARK_PAID_CONFIRM_MSG'),
+      buttons: [
+        {
+          text: this.translate.instant('WORK_LOGS.CANCEL'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('WORK_LOGS.CONFIRM'),
+          role: 'destructive',
+          handler: async () => {
+            for (const logId of this.selectedLogs) {
+              const log = this.allLogs.find(l => l.id === logId);
+              if (log) {
+                log.isPaid = false;
+                log.paymentType = null as any;
+                await this.dbService.workLogRepo.save(log);
+              }
+            }
+            this.selectionMode = false;
+            this.selectedLogs.clear();
+            await this.dbService.notifyWorkLogsChanged();
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async confirmDeleteLog(log: WorkLog): Promise<void> {

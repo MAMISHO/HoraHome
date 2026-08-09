@@ -58,7 +58,19 @@
     "SHARE_WHATSAPP_ES": "WhatsApp (Spanish)",
     "SHARE_WHATSAPP_EN": "WhatsApp (English)",
     "SHARE_OTHER_APPS": "Other applications / More options",
-    "SHARE_COPY": "Copy to clipboard"
+    "SHARE_COPY": "Copy to clipboard",
+    "PAYMENT_STATUS_FILTER": "Payment status",
+    "ALL": "All",
+    "PAID": "Paid",
+    "UNPAID": "Unpaid",
+    "CASH": "Cash",
+    "CHECK": "Check",
+    "SELECTED": "selected",
+    "MARK_PAID_CONFIRM_TITLE": "Confirm payment",
+    "MARK_PAID_CONFIRM_MSG": "Are you sure you want to mark {{count}} record(s) as paid via {{type}}?",
+    "UNMARK_PAID_CONFIRM_TITLE": "Unmark payment",
+    "UNMARK_PAID_CONFIRM_MSG": "Are you sure you want to unmark payment for selected records?",
+    "CONFIRM": "Confirm"
   },
   "CLIENTS": {
     "TITLE": "Clients",
@@ -85,6 +97,10 @@
     "TO": "To",
     "TOTAL_HOURS": "Total hours",
     "ESTIMATED_EARNINGS": "Estimated earnings",
+    "UNPAID_HOURS": "Pending payment",
+    "PAID_HOURS": "Paid",
+    "CASH_PAID": "Paid in cash",
+    "CHECK_PAID": "Paid with check",
     "ALL_CLIENTS": "All clients",
     "SELECT_CLIENT": "Select client"
   },

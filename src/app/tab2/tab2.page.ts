@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ModalController, ViewWillEnter } from '@ionic/angular';
+import { GestureController, ModalController, ViewWillEnter } from '@ionic/angular';
 import { DatabaseService } from '../core/services/database.service';
 import { LanguageService } from '../core/services/language.service';
 import { WorkLog } from '../core/entities/work-log.entity';
@@ -31,7 +31,8 @@ function formatDateIso(d: Date): string {
   styleUrls: ['tab2.page.scss'],
   standalone: false,
 })
-export class Tab2Page implements OnInit, ViewWillEnter, OnDestroy {
+export class Tab2Page implements OnInit, AfterViewInit, ViewWillEnter, OnDestroy {
+  @ViewChild('calendarGrid', { read: ElementRef }) calendarGridRef!: ElementRef;
   private dbSub?: Subscription;
   currentMonthDate = new Date();
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -42,7 +43,8 @@ export class Tab2Page implements OnInit, ViewWillEnter, OnDestroy {
   constructor(
     private dbService: DatabaseService,
     private langService: LanguageService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private gestureCtrl: GestureController
   ) {
     if (this.currentMonthDate.getFullYear() < 2025) {
       this.currentMonthDate = new Date(2025, 0, 1);
@@ -62,6 +64,30 @@ export class Tab2Page implements OnInit, ViewWillEnter, OnDestroy {
 
   ngOnDestroy(): void {
     this.dbSub?.unsubscribe();
+  }
+
+  ngAfterViewInit(): void {
+    this.setupSwipeGesture();
+  }
+
+  private setupSwipeGesture(): void {
+    if (!this.calendarGridRef) return;
+
+    const gesture = this.gestureCtrl.create({
+      el: this.calendarGridRef.nativeElement,
+      gestureName: 'calendar-swipe',
+      threshold: 30,
+      onEnd: (detail) => {
+        if (Math.abs(detail.deltaX) > 80 && Math.abs(detail.deltaY) < 100) {
+          if (detail.deltaX < 0) {
+            this.changeMonth(1);
+          } else {
+            this.changeMonth(-1);
+          }
+        }
+      }
+    });
+    gesture.enable(true);
   }
 
   async ionViewWillEnter(): Promise<void> {

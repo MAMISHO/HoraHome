@@ -58,7 +58,19 @@
     "SHARE_WHATSAPP_ES": "WhatsApp (Espagnol)",
     "SHARE_WHATSAPP_EN": "WhatsApp (Anglais)",
     "SHARE_OTHER_APPS": "Autres applications / Plus d'options",
-    "SHARE_COPY": "Copier dans le presse-papiers"
+    "SHARE_COPY": "Copier dans le presse-papiers",
+    "PAYMENT_STATUS_FILTER": "Statut de paiement",
+    "ALL": "Tous",
+    "PAID": "Payés",
+    "UNPAID": "Non payés",
+    "CASH": "Espèces",
+    "CHECK": "Chèque",
+    "SELECTED": "sélectionné(s)",
+    "MARK_PAID_CONFIRM_TITLE": "Confirmer le paiement",
+    "MARK_PAID_CONFIRM_MSG": "Voulez-vous vraiment marquer {{count}} enregistrement(s) comme payé(s) par {{type}} ?",
+    "UNMARK_PAID_CONFIRM_TITLE": "Désactiver le paiement",
+    "UNMARK_PAID_CONFIRM_MSG": "Voulez-vous vraiment retirer la marque de paiement des enregistrements sélectionnés ?",
+    "CONFIRM": "Confirmer"
   },
   "CLIENTS": {
     "TITLE": "Clients",
@@ -85,6 +97,10 @@
     "TO": "Au",
     "TOTAL_HOURS": "Total des heures",
     "ESTIMATED_EARNINGS": "Revenus estimés",
+    "UNPAID_HOURS": "En attente de paiement",
+    "PAID_HOURS": "Payé",
+    "CASH_PAID": "Payé en espèces",
+    "CHECK_PAID": "Payé par chèque",
     "ALL_CLIENTS": "Tous les clients",
     "SELECT_CLIENT": "Sélectionner un client"
   },

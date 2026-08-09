@@ -120,7 +120,13 @@ export class DatabaseService {
       if (!columns.includes('endTime')) {
         await this.dataSource.query('ALTER TABLE work_logs ADD COLUMN endTime VARCHAR');
       }
-      console.log('[DatabaseService] Schema updates verified/applied (startTime, endTime).');
+      if (!columns.includes('isPaid')) {
+        await this.dataSource.query('ALTER TABLE work_logs ADD COLUMN isPaid BOOLEAN DEFAULT 0');
+      }
+      if (!columns.includes('paymentType')) {
+        await this.dataSource.query('ALTER TABLE work_logs ADD COLUMN paymentType VARCHAR');
+      }
+      console.log('[DatabaseService] Schema updates verified/applied (startTime, endTime, isPaid, paymentType).');
     } catch (e) {
       console.warn('[DatabaseService] Schema updates warning:', e);
     }

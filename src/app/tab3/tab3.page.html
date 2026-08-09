@@ -2,6 +2,10 @@
   <ion-toolbar color="primary">
     <ion-title>{{ 'WORK_LOGS.TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="toggleSelectionMode()" [disabled]="filteredLogs.length === 0" [fill]="selectionMode ? 'solid' : 'clear'" [color]="selectionMode ? 'secondary' : 'light'" title="Gestión de pagos">
+        <span [style.filter]="selectionMode ? 'none' : 'grayscale(100%)'" [style.opacity]="selectionMode ? '1' : '0.5'" style="font-size: 1.3rem; transition: all 0.3s ease;">🤝</span>
+        <ion-icon *ngIf="selectionMode" name="close-circle-outline" style="margin-left: 4px; font-size: 1.1rem;"></ion-icon>
+      </ion-button>
       <ion-button (click)="shareLogs()" [disabled]="filteredLogs.length === 0" title="{{ 'WORK_LOGS.SHARE' | translate }}">
         <ion-icon name="share-social-outline" slot="icon-only"></ion-icon>
       </ion-button>
@@ -81,6 +85,18 @@
     </ion-select>
   </ion-item>
 
+  <!-- Filtro por Estado de Pago -->
+  <ion-item fill="outline" class="ion-margin-bottom">
+    <ion-label position="stacked">{{ 'WORK_LOGS.PAYMENT_STATUS_FILTER' | translate }}</ion-label>
+    <ion-select interface="popover" [(ngModel)]="filterPaymentStatus" (ionChange)="filterLogs()">
+      <ion-select-option value="all">{{ 'WORK_LOGS.ALL' | translate }}</ion-select-option>
+      <ion-select-option value="paid">{{ 'WORK_LOGS.PAID' | translate }}</ion-select-option>
+      <ion-select-option value="unpaid">{{ 'WORK_LOGS.UNPAID' | translate }}</ion-select-option>
+      <ion-select-option value="cash">💵 {{ 'WORK_LOGS.CASH' | translate }}</ion-select-option>
+      <ion-select-option value="check">🧾 {{ 'WORK_LOGS.CHECK' | translate }}</ion-select-option>
+    </ion-select>
+  </ion-item>
+
   <!-- Tarjeta con resumen de total horas de filtros -->
   <div class="total-hours-container ion-margin-bottom" *ngIf="filteredLogs.length > 0">
     <ion-card class="total-hours-card">
@@ -111,14 +127,39 @@
     </ion-item>
   </ion-list>
 
+  <!-- Action Bar for Selection Mode -->
+  <ion-toolbar *ngIf="selectionMode" color="light" class="ion-margin-bottom">
+    <ion-buttons slot="start">
+      <ion-button (click)="toggleSelectionMode()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title size="small">{{ selectedLogs.size }} {{ 'WORK_LOGS.SELECTED' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="unmarkSelectedAsPaid()" [disabled]="selectedLogs.size === 0" color="medium" title="Quitar marca">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="markSelectedAsPaid('cash')" [disabled]="selectedLogs.size === 0" color="success" title="Efectivo">
+        <ion-icon name="cash-outline" slot="icon-only"></ion-icon> 💵
+      </ion-button>
+      <ion-button (click)="markSelectedAsPaid('check')" [disabled]="selectedLogs.size === 0" color="primary" title="Cheque">
+        <ion-icon name="document-text-outline" slot="icon-only"></ion-icon> 🧾
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
   <!-- Lista de Registros Cronológica Descendente -->
   <ion-list *ngIf="!isLoading && filteredLogs.length > 0">
-    <ion-item-sliding *ngFor="let log of filteredLogs">
-      <ion-item (click)="editLog(log)">
+    <ion-item-sliding *ngFor="let log of filteredLogs" [disabled]="selectionMode">
+      <ion-item (click)="handleItemClick(log)" [color]="selectedLogs.has(log.id) ? 'light' : ''">
+        <ion-checkbox *ngIf="selectionMode" slot="start" [checked]="selectedLogs.has(log.id)" (click)="$event.preventDefault()"></ion-checkbox>
         <ion-label>
           <h2>
             <strong>{{ log.client.name }}</strong>
             <span class="hours-badge">{{ log.hours }} {{ 'COMMON.HOURS_SHORT' | translate }}</span>
+            <span *ngIf="log.isPaid" class="payment-badge" style="margin-left: 8px; font-size: 1.2em;">
+              {{ log.paymentType === 'cash' ? '💵' : '🧾' }}
+            </span>
           </h2>
           <p>
             {{ ('SERVICES.' + log.service.name) | translate }} • {{ log.workDate | date:'fullDate' }}<span *ngIf="log.startTime && log.endTime"> • {{ log.startTime }} - {{ log.endTime }}</span>

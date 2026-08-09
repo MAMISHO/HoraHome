@@ -61,6 +61,17 @@
         </ion-select>
       </ion-item>
 
+      <ion-item fill="outline" class="ion-margin-bottom">
+        <ion-label position="stacked">{{ 'WORK_LOGS.PAYMENT_STATUS_FILTER' | translate }}</ion-label>
+        <ion-select [(ngModel)]="filterPaymentStatus" (ionChange)="generateReport()">
+          <ion-select-option value="all">{{ 'WORK_LOGS.ALL' | translate }}</ion-select-option>
+          <ion-select-option value="paid">{{ 'WORK_LOGS.PAID' | translate }}</ion-select-option>
+          <ion-select-option value="unpaid">{{ 'WORK_LOGS.UNPAID' | translate }}</ion-select-option>
+          <ion-select-option value="cash">💵 {{ 'WORK_LOGS.CASH' | translate }}</ion-select-option>
+          <ion-select-option value="check">🧾 {{ 'WORK_LOGS.CHECK' | translate }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
       <!-- Resultados del Reporte -->
       <div class="report-summary">
         <div class="metric">
@@ -70,6 +81,26 @@
         <div class="metric">
           <span class="metric-label">{{ 'REPORTS.ESTIMATED_EARNINGS' | translate }}</span>
           <span class="metric-value earnings">{{ estimatedEarnings }} €</span>
+        </div>
+      </div>
+
+      <!-- Desglose de Pagos -->
+      <div class="report-summary" style="margin-top: 12px;">
+        <div class="metric" style="border-left: 3px solid var(--ion-color-warning); padding-left: 8px;">
+          <span class="metric-label">⏳ {{ 'REPORTS.UNPAID_HOURS' | translate }}</span>
+          <span class="metric-value">{{ unpaidHours }} h — {{ unpaidEarnings }} €</span>
+        </div>
+        <div class="metric" style="border-left: 3px solid var(--ion-color-success); padding-left: 8px;">
+          <span class="metric-label">✅ {{ 'REPORTS.PAID_HOURS' | translate }}</span>
+          <span class="metric-value">{{ paidHours }} h — {{ paidEarnings }} €</span>
+        </div>
+        <div class="metric" *ngIf="cashHours > 0" style="padding-left: 20px;">
+          <span class="metric-label">💵 {{ 'REPORTS.CASH_PAID' | translate }}</span>
+          <span class="metric-value">{{ cashHours }} h — {{ cashEarnings }} €</span>
+        </div>
+        <div class="metric" *ngIf="checkHours > 0" style="padding-left: 20px;">
+          <span class="metric-label">🧾 {{ 'REPORTS.CHECK_PAID' | translate }}</span>
+          <span class="metric-value">{{ checkHours }} h — {{ checkEarnings }} €</span>
         </div>
       </div>
 

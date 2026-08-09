@@ -31,6 +31,8 @@ export class WorkLogModalComponent implements OnInit {
   startTime = '09:00';
   endTime = '17:00';
   notes = '';
+  isPaid = false;
+  paymentType?: 'cash' | 'check';
 
   isHoliday = false;
   holidayName = '';
@@ -109,6 +111,8 @@ export class WorkLogModalComponent implements OnInit {
     this.startTime = log.startTime || '09:00';
     this.endTime = log.endTime || this.calculateEndTime('09:00', this.hours);
     this.notes = log.notes || '';
+    this.isPaid = log.isPaid || false;
+    this.paymentType = log.paymentType;
   }
 
   resetForm(): void {
@@ -132,6 +136,8 @@ export class WorkLogModalComponent implements OnInit {
     this.startTime = start;
     this.endTime = this.calculateEndTime(this.startTime, this.hours);
     this.notes = '';
+    this.isPaid = false;
+    this.paymentType = undefined;
   }
 
   isValidForm(): boolean {
@@ -303,6 +309,8 @@ export class WorkLogModalComponent implements OnInit {
       log.startTime = this.startTime || undefined;
       log.endTime = this.endTime || undefined;
       log.notes = this.notes.trim() || undefined;
+      log.isPaid = this.isPaid;
+      log.paymentType = this.isPaid ? this.paymentType : undefined;
 
       await this.dbService.workLogRepo.save(log);
       this.hasSavedChanges = true;
