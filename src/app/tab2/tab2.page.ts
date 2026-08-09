@@ -36,6 +36,7 @@ export class Tab2Page implements OnInit, AfterViewInit, ViewWillEnter, OnDestroy
   private dbSub?: Subscription;
   private touchStartX = 0;
   private touchStartY = 0;
+  slideDirection: 'none' | 'slide-left' | 'slide-right' = 'none';
   currentMonthDate = new Date();
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   calendarDays: CalendarDay[] = [];
@@ -109,8 +110,26 @@ export class Tab2Page implements OnInit, AfterViewInit, ViewWillEnter, OnDestroy
       1
     );
     if (nextDate.getFullYear() < 2025) return;
-    this.currentMonthDate = nextDate;
-    this.generateCalendar();
+
+    // Slide out
+    this.slideDirection = delta > 0 ? 'slide-left' : 'slide-right';
+
+    setTimeout(() => {
+      this.currentMonthDate = nextDate;
+      this.generateCalendar();
+
+      // Slide in from opposite side
+      this.slideDirection = delta > 0 ? 'slide-right' : 'slide-left';
+
+      // Force reflow, then remove class for enter animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.zone.run(() => {
+            this.slideDirection = 'none';
+          });
+        });
+      });
+    }, 180);
   }
 
   changeYear(delta: number): void {

@@ -45,6 +45,23 @@
   padding: 8px;
   border-radius: 14px;
   margin-bottom: 16px;
+  overflow: hidden;
+  transition: transform 0.18s ease-out, opacity 0.18s ease-out;
+
+  &.slide-left {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  &.slide-right {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  &.none {
+    transform: translateX(0);
+    opacity: 1;
+  }
 
   .weekday-header {
     text-align: center;
