@@ -153,5 +153,8 @@
     "NO_DIFFERENT": "No, es diferente",
     "CONFLICTS_HEADER": "Registros omitidos",
     "CONFLICTS_BODY": "Se restauró la copia de seguridad, pero se omitieron {{count}} registros locales debido a solapamiento de horarios (ya resguardados en Drive/Conflict_Backups)."
+  },
+  "AUTH": {
+    "SESSION_EXPIRED": "Sesión expirada. Por favor inicie sesión nuevamente."
   }
 }

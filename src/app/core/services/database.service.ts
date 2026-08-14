@@ -67,32 +67,47 @@ export class DatabaseService {
 
     try {
       await this.closeConnection();
-      // 1. Intentar inicializar SIN sincronización primero (ideal para verificar el estado de base de datos)
-      this.dataSource = await this.strategy.createDataSource(false);
-      await this.dataSource.initialize();
 
-      // 2. Comprobar si las tablas principales existen
-      const tablesExist = await this.checkIfTablesExist();
+      // 1. Intentar inicializar con el esquema existente primero
+      let initialized = false;
+      try {
+        this.dataSource = await this.strategy.createDataSource(false);
+        await this.dataSource.initialize();
+        const tablesExist = await this.checkIfTablesExist();
+        if (tablesExist) {
+          await this.runSchemaUpdates();
+          initialized = true;
+        }
+      } catch (e) {
+        console.warn('[DatabaseService] Initial check without sync failed, falling back to full schema sync:', e);
+      }
 
-      if (!tablesExist) {
-        console.log('[DatabaseService] Database is empty. Re-initializing with synchronize=true to build schema...');
+      // 2. Si es base de datos limpia o no existen tablas, inicializar con synchronize=true
+      if (!initialized) {
+        console.log('[DatabaseService] Building database schema with synchronize=true...');
         await this.closeConnection();
-        // Espera de 100ms para asegurar la liberación del descriptor de archivo
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 150));
 
         this.dataSource = await this.strategy.createDataSource(true);
         await this.dataSource.initialize();
-      } else {
-        console.log('[DatabaseService] Database tables exist. Checking schema updates...');
-        // 3. Si ya existen, añadir las nuevas columnas de forma segura sin romper datos
-        await this.runSchemaUpdates();
       }
 
       await this.seedServices();
       await this.seedHolidays();
       console.log(`[DatabaseService] Database successfully initialized on platform '${platform}'.`);
     } catch (error) {
-      console.error('[DatabaseService] Critical initialization error:', error);
+      console.error('[DatabaseService] Critical initialization error, attempting emergency fallback:', error);
+      try {
+        await this.closeConnection();
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        this.dataSource = await this.strategy.createDataSource(true);
+        await this.dataSource.initialize();
+        await this.seedServices();
+        await this.seedHolidays();
+        console.log('[DatabaseService] Emergency fallback initialization succeeded.');
+      } catch (fallbackError) {
+        console.error('[DatabaseService] Emergency fallback failed:', fallbackError);
+      }
     }
   }
 

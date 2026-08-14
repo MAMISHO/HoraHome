@@ -153,5 +153,8 @@
     "NO_DIFFERENT": "No, it's different",
     "CONFLICTS_HEADER": "Skipped Records",
     "CONFLICTS_BODY": "Backup restored, but {{count}} local records were skipped due to overlapping hours (already backed up in Drive/Conflict_Backups)."
+  },
+  "AUTH": {
+    "SESSION_EXPIRED": "Session expired. Please sign in again."
   }
 }

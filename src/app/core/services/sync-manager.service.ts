@@ -26,12 +26,21 @@ export class SyncManagerService {
   async syncAll(onProgress?: (progress: number) => void, isManual = false): Promise<void> {
     if (this.isSyncing) return;
 
+    if (!this.dbService.isReady()) {
+      console.warn('[SyncManagerService] Database is not initialized yet. Skipping syncAll.');
+      return;
+    }
+
     if (onProgress) onProgress(0.05);
 
     // Verificar si el usuario está autenticado en Google
-    const token = await this.authService.getAccessToken();
+    const token = await this.authService.getAccessToken().catch(() => null);
     if (!token) {
-      throw new Error('Sincronización cancelada: No se pudo obtener el token de Google. Por favor, cierra sesión e inicia sesión de nuevo para aceptar los nuevos permisos.');
+      if (isManual) {
+        throw new Error('Sincronización cancelada: No se pudo obtener el token de Google.');
+      }
+      console.warn('[SyncManagerService] Token de Google no disponible. Omitiendo sincronización de fondo.');
+      return;
     }
 
     // EVITAR MACHACAR LA NUBE EN EL PRIMER SYNC DE FONDO

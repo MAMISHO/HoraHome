@@ -153,5 +153,8 @@
     "NO_DIFFERENT": "Non, c'est différent",
     "CONFLICTS_HEADER": "Enregistrements ignorés",
     "CONFLICTS_BODY": "Sauvegarde restaurée, mais {{count}} enregistrements locaux ont été ignorés en raison de chevauchements d'horaires (déjà sauvegardés dans Drive/Conflict_Backups)."
+  },
+  "AUTH": {
+    "SESSION_EXPIRED": "Session expirée. Veuillez vous reconnecter."
   }
 }

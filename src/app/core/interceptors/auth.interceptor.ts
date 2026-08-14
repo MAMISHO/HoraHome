@@ -67,8 +67,9 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private async handleSessionExpired(): Promise<void> {
     await this.authService.signOut();
+    const message = this.translate.instant('AUTH.SESSION_EXPIRED');
     const toast = await this.toastCtrl.create({
-      message: this.translate.instant('AUTH.SESSION_EXPIRED') || 'Sesión expirada. Por favor inicie sesión nuevamente.',
+      message,
       duration: 4000,
       color: 'danger'
     });
